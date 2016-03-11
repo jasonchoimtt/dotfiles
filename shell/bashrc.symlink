@@ -7,7 +7,9 @@ HISTSIZE=3000
 HISTFILESIZE=3000
 
 # Completion
-[ -f $(brew --prefix)/etc/bash_completion ] && source $(brew --prefix)/etc/bash_completion
+if which brew >/dev/null; then
+    [ -f $(brew --prefix)/etc/bash_completion ] && source $(brew --prefix)/etc/bash_completion
+fi
 
 export DOTFILES_ROOT=~/.dotfiles
 source "$DOTFILES_ROOT/shell/index.sh"

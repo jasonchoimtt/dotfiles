@@ -66,6 +66,10 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
         zle -N xvimopen
         bindkey '\Cf' xvimopen
     fi
+else
+    if [ $SHELL_TYPE '==' bash ]; then
+        bind -x '"\C-f": "vimopen"'
+    fi
 fi
 
 # vim:ft=zsh:

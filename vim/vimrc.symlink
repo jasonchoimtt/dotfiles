@@ -12,7 +12,11 @@ set ruler
 set ai si ci
 let lwd=getcwd() " cwd at launch
 set ts=4 sw=4 et sts=4
-set wrap linebreak breakindent
+set wrap linebreak
+try
+    set breakindent
+catch E518
+endtry
 set colorcolumn=81,100
 " set modeline modelines=5
 

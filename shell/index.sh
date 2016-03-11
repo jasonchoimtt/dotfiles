@@ -11,6 +11,9 @@ _color_seq() {
     else
         printf "\e[38;5;${color}m"
     fi
+    if [ -n "$2" ]; then
+        printf "$2\e[0m\n"
+    fi
 }
 
 [ -z "$PROMPT_COLOR" ] && PROMPT_COLOR=4
@@ -28,9 +31,11 @@ export MANPAGER="bash -c \"vim -n -c 'setl ft=man ro nomod noma' -c 'nmap q ZQ' 
 
 # Aliases
 alias l='ls'
+[ "$(uname -s)" != "Darwin" ] && alias ls='ls --color=auto'
 alias la='ls -al'
 alias rm='rm -i'
 
+alias vimopen='vim -c CtrlP'
 alias vgit='vim . -c Gstatus'
 
 [ -f ~/.localrc ] && source ~/.localrc
