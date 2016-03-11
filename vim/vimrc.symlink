@@ -1,0 +1,443 @@
+set nocompatible
+
+let ide = 0
+
+if filereadable(expand('~/.vimrc_local'))
+    source ~/.vimrc_local
+endif
+
+" Basic config {{{1
+syntax on
+set ruler
+set ai si ci
+let lwd=getcwd() " cwd at launch
+set ts=4 sw=4 et sts=4
+set wrap linebreak breakindent
+set colorcolumn=81,100
+" set modeline modelines=5
+
+set nojoinspaces
+
+set hidden
+set viminfo+=f1
+set splitright
+
+set nofileignorecase
+set wildignore+=.git,venv,__pycache__,node_modules,elm-stuff,build,gradle
+
+set mouse=a
+set scrolloff=5
+
+cabbrev help tab help
+command! Dot tabe ~/.vimrc
+command! Q q
+
+let mapleader=","
+
+" List characters {{{1
+set list
+set listchars=tab:·\ ,trail:-,extends:>,precedes:<,nbsp:+
+autocmd InsertEnter * setlocal nolist
+autocmd InsertLeave * setlocal list
+
+" Mouse motion {{{1
+nnoremap <ScrollWheelUp> 3<c-y>3k
+nnoremap <ScrollWheelDown> 3<c-e>3j
+nmap <C-ScrollWheelUp> k
+nmap <C-ScrollWheelDown> j
+nmap <M-ScrollWheelUp> <c-y>
+nmap <M-ScrollWheelDown> <c-e>
+
+" Window and tab navigation {{{1
+nmap <tab> <c-w><c-w>
+nmap <s-tab> <c-w>k
+" Go to last tab
+au TabLeave * let g:lasttab = tabpagenr()
+nmap <silent> g` :exe "tabn ".g:lasttab<cr>
+
+" Terminal.app tab switching {{{1
+exec "nmap <silent> \e1 1gt"
+exec "nmap <silent> \e2 2gt"
+exec "nmap <silent> \e3 3gt"
+exec "nmap <silent> \e4 4gt"
+exec "nmap <silent> \e5 5gt"
+exec "nmap <silent> \e6 6gt"
+exec "nmap <silent> \e7 7gt"
+exec "nmap <silent> \e8 8gt"
+exec "nmap <silent> \e9 9gt"
+
+" Searching {{{1
+set hls incsearch
+nmap <silent> <esc><esc> :nohls<cr>
+"\|call QuickfixsignsUpdate()<cr>
+set timeout timeoutlen=3000 ttimeoutlen=10
+
+" Centering with foldcolumn and numberwidth (gutter) {{{1
+nmap <silent> [, :let &fdc-=1<cr>
+nmap <silent> ], :let &fdc+=1<cr>
+nmap <silent> [< :let &fdc=0<cr>
+nmap <silent> ]< :let &fdc=12<cr>
+nmap <silent> [. :let &nuw-=1<cr>
+nmap <silent> ]. :let &nuw+=1<cr>
+nmap <silent> [> :let &nuw-=5<cr>
+nmap <silent> ]> :let &nuw+=5<cr>
+
+" Text wrapping {{{1
+nmap <silent> <leader>j gqip
+vmap <silent> <leader>j gq
+nmap <silent> <leader>J vipJ
+
+" Add trailing character {{{1
+nmap <silent> <leader>, A,<esc>
+nmap <silent> <leader>; A;<esc>
+nmap <silent> <leader>} A}<esc>
+nmap <silent> <leader>) A)<esc>
+
+" Paste and keep cursor position {{{1
+nmap <silent> gp p`[
+nmap <silent> gP P`[
+" Select last pasted text
+nmap <silent> gV `[v`]
+
+" Move line {{{1
+nmap <silent> <c-j> :move'>+1<cr>
+nmap <silent> <c-k> :move-2<cr>
+vmap <silent> <c-j> :move'>+1<cr>gv
+vmap <silent> <c-k> :move-2<cr>gv
+
+" Shell title reporting {{{1
+set titleold=_sh
+set titlestring=‣%{expand('%:t')}%m
+if &term =~ "screen"
+    set t_ts=k
+    set t_fs=\
+endif
+if &term =~ "screen" || &term =~ "xterm"
+    set title
+endif
+
+" Omni-complete {{{1
+set complete+=b " Search other open buffers for keywords
+" ctrl-space
+inoremap <c-@> <c-x><c-o>
+function! CleverTab()
+   if strpart( getline('.'), 0, col('.')-1 ) =~ '^\%(\s\|-\)*$'
+      return "\<tab>"
+   else
+      return "\<c-n>"
+   endif
+endfunction
+" Keyword complete
+inoremap <silent> <tab> <c-r>=CleverTab()<cr>
+" Compilation {{{1
+nmap <silent> <f1> :up<cr>:make<cr>
+nmap <silent> <leader>w :up<cr>
+nmap <silent> <leader>M :up<cr>:make<cr>
+function! GetInterpreter()
+    return exists('b:interpreter') ? b:interpreter : 'make %< && ./%<'
+endfunction
+nmap <silent> <leader>r :up<cr>:exec '!'.GetInterpreter()<cr>
+if ide
+    nmap <silent> <leader>R :up<cr>:exec 'Dispatch '.GetInterpreter()<cr>
+endif
+nmap <silent> <leader>i :exec '!'.b:repl<cr>
+nmap <silent> <leader>I :exec '!'.b:repl_with_file<cr>
+nmap ZS :up<cr><c-z>
+
+" }}}
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Plugin supported stuff
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Plugins {{{1
+filetype off
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'gmarik/Vundle.vim'
+
+Plugin 'jonathanfilip/vim-lucius'  " Colorscheme
+
+Plugin 'scrooloose/nerdtree'
+Plugin 'ctrlpvim/ctrlp.vim'
+
+Plugin 'tpope/vim-dispatch'
+
+" Plugin 'jeffkreeftmeijer/vim-numbertoggle'
+Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-commentary'
+Plugin 'tpope/vim-unimpaired'
+Plugin 'tpope/vim-repeat'
+Plugin 'tpope/vim-rsi'
+Plugin 'Valloric/ListToggle'
+Plugin 'kshenoy/vim-signature'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'tpope/vim-fugitive'
+
+if ide
+    Plugin 'AndrewRadev/splitjoin.vim'
+    Plugin 'Raimondi/Delimitmate'
+    Plugin 'alvan/vim-closetag'
+
+    Plugin 'scrooloose/syntastic'
+    Plugin 'aquach/vim-http-client'
+    Plugin 'Shougo/neocomplete.vim'
+    Plugin 'MarcWeber/vim-addon-mw-utils'
+    Plugin 'tomtom/tlib_vim'
+    Plugin 'garbas/vim-snipmate'
+    Plugin 'honza/vim-snippets'
+
+    Plugin 'ap/vim-css-color'
+    Plugin 'klen/python-mode'
+    Plugin 'pangloss/vim-javascript'
+    " Plugin 'moll/vim-node'
+    Plugin 'Quramy/vim-js-pretty-template'
+    Plugin 'kchmck/vim-coffee-script'
+    Plugin 'leafgarland/typescript-vim'
+    " Plugin 'Shougo/vimproc' " Required for tsuquyomi
+    " Plugin 'Quramy/tsuquyomi' " TypeScript omnicomplete
+    Plugin 'plasticboy/vim-markdown'
+    Plugin 'digitaltoad/vim-pug'
+    Plugin 'rust-lang/rust.vim'
+    Plugin 'hsanson/vim-android'
+    Plugin 'artur-shaik/vim-javacomplete2'
+endif
+
+call vundle#end()
+
+filetype plugin indent on
+
+command! VInstall normal VY:@"<cr>:VundleInstall<cr>
+
+" Colorscheme {{{1
+try
+    colorscheme lucius
+    command! Theme exec "LuciusDark" |
+        \ hi clear SignColumn |
+        \ hi link SignColumn LineNr |
+        \ hi clear FoldColumn |
+        \ hi link FoldColumn LineNr |
+        \ hi Comment ctermfg=246 guifg=#949494
+    Theme
+catch E185
+endtry
+
+" snipMate {{{1
+if ide
+    let g:snipMate = {}
+    let g:snipMate.scope_aliases = {}
+    let g:snipMate.snippet_version = 1
+    imap <c-h> <Plug>snipMateNextOrTrigger
+    imap <c-x><c-h> <Plug>snipMateShow
+    smap <c-h> <Plug>snipMateNextOrTrigger
+    xmap <c-h> <Plug>snipMateVisual
+endif
+
+" File navigation {{{1
+nmap <silent> <leader>t :exec 'NERDTreeToggle '.lwd<cr>
+nmap <silent> <leader>T :exec 'NERDTreeToggle'<cr>
+nmap <silent> <leader>e :CtrlP<cr>
+nmap <silent> <c-f> :CtrlP<cr>
+nmap <silent> <leader>E :CtrlPBuffer<cr>
+nmap <leader>c :lcd %:p:h<cr>
+
+let g:ctrlp_working_path_mode = ''
+
+" Other editing magic {{{1
+if ide
+    " splitjoin.vim: gJ, gK
+    let g:splitjoin_split_mapping = 'gK'
+
+    " closetag.vim
+    let g:closetag_filenames = "*.html,*.hbs,*.jsx,*.xml"
+
+    " delimitMate
+    let delimitMate_expand_cr = 1
+    let delimitMate_nesting_quotes = ["'","`"]
+    let delimitMate_expand_space = 1
+    let delimitMate_excluded_regions = "Comment,String"
+endif
+
+
+" HTTP client {{{1
+if ide
+    let g:http_client_bind_hotkey=0
+    map <silent> ,h :HTTPClientDoRequest<cr>
+endif
+
+" }}}
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" File types and related plugins
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Remote power {{{1
+if !empty($TMUX)
+    command! Write w | call system('tmux send-keys -t {last} C-c Up Enter')
+    command! W Write
+    command! Wa wa | call system('tmux send-keys -t {last} C-c Up Enter')
+endif
+
+" syntastic {{{1
+if ide
+    let g:syntastic_always_populate_loc_list = 1
+    let g:syntastic_auto_loc_list = 2
+    " set rulerformat=%30(%l,%c%V%=%P\ \ %#Error#%{SyntasticStatuslineFlag()}%*%)
+    " let g:syntastic_stl_format=" %t "
+    let g:syntastic_enable_highlighting = 0
+    "let g:syntastic_enable_signs = 0
+endif
+
+" gitgutter {{{1
+let g:gitgutter_sign_column_always = 1
+
+" Python .py {{{1
+au FileType python
+    \ setlocal foldlevel=2|
+    \ let b:interpreter="python3 %"|
+    \ let b:repl_with_file="python3 -i %"|
+    \ let b:repl="python3"
+if ide
+    let g:pymode_lint = 0
+    let g:pymode_virtualenv = 0
+    let g:pymode_rope = 0
+    let g:pymode_run = 0
+    let g:syntastic_python_checkers = ["pyflakes"]
+endif
+
+
+" JavaScript .js {{{1
+au FileType javascript
+    \ let b:interpreter="node -es-staging %"|
+    \ let b:repl_with_file="node -es-staging"|
+    \ let b:repl="node -es-staging"
+function! SwitchSpecFile()
+    if match(expand('%'), '\.[jt]s$') != -1
+        if match(expand('%'), '\.spec\.[jt]s$') != -1
+            exec 'edit '.substitute(expand('%'), '\.spec\(\.[jt]s\)', '\1', '')
+        else
+            exec 'edit '.substitute(expand('%'), '\(\.[jt]s\)', '.spec\1', '')
+        endif
+    endif
+endfunction
+map <silent> <leader>s :call SwitchSpecFile()<cr>
+if ide
+    let g:javascript_enable_domhtmlcss = 1
+    let g:syntastic_javascript_checkers = ["eslint"]
+    let g:snipMate.scope_aliases['javascript'] = 'javascript,javascript.es6'
+    command! EslintFix exec '!eslint --fix "%"' | SyntasticCheck
+endif
+
+
+" CoffeeScript .coffee .{{{1
+au FileType coffee set makeprg= " Accidental compilation may shield the .coffee
+au FileType coffee setlocal ts=2 sw=2 sts=2
+
+" TypeScript .ts {{{1
+if ide
+    let g:typescript_compiler_options='--sourcemap --module commonjs'
+    let g:typescript_indent_disable = 1
+    let g:syntastic_typescript_checkers = ["tslint"]
+    let g:tsuquyomi_definition_split = 3
+endif
+
+
+" Elm .elm {{{1
+au BufRead,BufNewFile *.elm set ft=haskell
+
+
+" Markdown .md {{{1
+au FileType markdown
+    \ let &l:makeprg='mark -o "%:r.pdf" "%" && open "%:r.pdf"'|
+    \ nmap <buffer> <f1> :up<cr>:Make!<cr>|
+    \ setlocal tw=79 |
+    \ let &l:commentstring=">%s"
+if ide
+    au Syntax markdown
+        \ syn clear mkdMath |
+        \ syn region mkdMath matchgroup=mkdDelimiter start="\\\@<!\$" end="\$" oneline |
+        \ syn region mkdMath matchgroup=mkdDelimiter start="\\\@<!\$\$" end="\$\$"
+    let g:vim_markdown_folding_disabled = 1
+    let g:vim_markdown_frontmatter = 1
+endif
+
+
+" HTML and templating {{{1
+au FileType html setlocal indentexpr=
+au BufRead,BufNewFile *.md set ft=markdown
+au BufRead,BufNewFile *.hbs,*.swig set ft=html
+
+
+" Rust .rs {{{1
+if ide
+    au FileType rust setlocal cc=100|
+        \ compiler rustc
+endif
+
+
+" C/C++ .c .cpp {{{1
+function! SwitchSourceHeader()
+    "update!
+    if (expand ("%:e") == "cpp")
+        find %:t:r.h
+    else
+        try
+            find %:t:r.c
+        catch /E345/
+            find %:t:r.cpp
+        endtry
+    endif
+endfunction
+au FileType cpp nmap <leader>s :call SwitchSourceHeader()<cr>
+
+" Vim .vim {{{1
+au FileType vim setlocal foldmethod=marker
+
+
+" YAML .yaml {{{1
+au FileType yaml setlocal ts=2 sw=2 sts=2
+
+
+" Ruby .rb {{{1
+au FileType ruby
+    \ let b:interpreter="ruby %"|
+    \ let b:repl_with_file="ruby"|
+    \ let b:repl="ruby"
+
+
+" Java .java {{{1
+au FileType java
+    \ setlocal omnifunc=javacomplete#Complete
+if ide
+    au FileType java
+        \ NeoCompleteEnable
+        \|map <buffer> <leader>i :JCimportAdd<cr>
+endif
+
+
+" Man pages {{{1
+au FileType man
+    \ setlocal ts=8 nolist nornu nonu cc= fdm=indent fdl=99 so=50
+    \|let &titlestring=split(getline('1').getline('2'), '\s\+', 'keepempty')[0].""
+    \|nmap q ZQ
+    \|normal M0
+
+" let $MANPAGER='cat'
+" function! Man(...)
+"     let target = a:1
+"     if empty(target)
+"         let target = expand('<cword>')
+"         if empty(target)
+"             return
+"         endif
+"     endif
+"     let fname = system('man -w \"'.target.'"')
+"     let fname = substitute(fname, '\n', '', '')
+"     if match(fname, 'No manual entry for .*') != -1
+"         echo fname
+"     else
+"         new
+"         exec 'tabe '.fname
+"     endif
+" endfunction
+" command! -nargs=? Man call Man(<q-args>)
+" nmap <silent> K :Man<cr>
+"

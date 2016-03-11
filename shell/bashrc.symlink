@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Prompt
+
+# History control
+HISTCONTROL=ignoredups
+HISTSIZE=3000
+HISTFILESIZE=3000
+
+# Completion
+[ -f $(brew --prefix)/etc/bash_completion ] && source $(brew --prefix)/etc/bash_completion
+
+export DOTFILES_ROOT=~/.dotfiles
+source "$DOTFILES_ROOT/shell/index.sh"
+
+# Prompt
+prompt_color() {
+    PS1="\[$(_color_seq $1)\]\h:\W $ \[$(_color_seq)\]" # \h
+}
+prompt_color $PROMPT_COLOR

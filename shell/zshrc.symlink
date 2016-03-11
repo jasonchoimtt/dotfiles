@@ -1,0 +1,85 @@
+#!/usr/bin/env zsh
+export SHELL=$(which zsh)
+bindkey -e  # emacs keys
+
+# History
+HISTFILE="~/.zsh_history"
+HISTSIZE=3000
+SAVEHIST=3000
+setopt APPEND_HISTORY
+setopt HIST_IGNORE_DUPS
+
+
+# Auto-completion
+fpath=(/usr/local/share/zsh-completions $fpath)
+autoload -U compinit
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.cache/zsh
+compinit
+
+autoload -U tetris
+
+# CD recent
+autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
+add-zsh-hook chpwd chpwd_recent_dirs
+zstyle ':completion:*' menu selection
+
+export DOTFILES_ROOT=~/.dotfiles
+source "$DOTFILES_ROOT/shell/index.sh"
+
+# Prompt
+_get_git_branch() {
+    local branch
+    branch=$([ -d .git ] && git branch 2>/dev/null | while read line; do
+        [ $line '=~' '\* .*' ] && echo ${line[3,${#line}]}
+    done)
+    echo ${branch:+$branch$1}
+}
+
+setopt PROMPT_SUBST
+prompt_color() {
+    PS1="%F{$1}\$(_get_git_branch :)%c $ %f"
+}
+prompt_color $PROMPT_COLOR
+
+# Job list title
+case $TERM in
+    screen*)
+        precmd() {
+            local mark=◦
+            [ $#jobtexts != 0 ] && mark=⊕
+            printf "\ek$mark${jobtexts/ */}\e\\"
+        }
+        preexec() {
+            local mark=
+            [ $#jobtexts != 0 ] && mark=˖
+            local job=${1/ */}
+            if [ job '==' fg ]; then
+                job=${jobtexts[%%]/ */}
+            fi
+            printf "\ek$job$mark${jobtexts/ */}\e\\"
+        }
+        ;;
+esac
+
+# Quickly vim
+fg_vim() {
+    fg %vim 2>/dev/null
+    precmd
+    zle redisplay
+}
+zle -N fg_vim
+bindkey '\Cz' fg_vim
+
+# Cowtune
+zle-line-init() {
+    zle -M -c "$(cowtune)"
+    zle-line-init() {
+    }
+}
+zle -N zle-line-init
+
+# Syntax highlighting
+# Must be at the bottom
+[ -f /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ] \
+    && source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
