@@ -20,6 +20,8 @@ endtry
 set colorcolumn=81,100
 " set modeline modelines=5
 
+set foldlevel=100
+
 set nojoinspaces
 
 set hidden
@@ -35,6 +37,8 @@ set scrolloff=5
 cabbrev help tab help
 command! Dot tabe ~/.vimrc
 command! Q q
+" Run selected command
+vmap Q "qy:@q<cr>
 
 let mapleader=","
 
@@ -43,6 +47,44 @@ set list
 set listchars=tab:·\ ,trail:-,extends:>,precedes:<,nbsp:+
 autocmd InsertEnter * setlocal nolist
 autocmd InsertLeave * setlocal list
+
+" Folded line {{{1
+" http://vim.wikia.com/wiki/Customize_text_for_closed_folds
+" Set a nicer foldtext function
+function! MyFoldText()
+    let line = getline(v:foldstart)
+    if match(line, '^[ \t]*\(\/\*\|\/\/\)[*/\\]*[ \t]*$') == 0
+        let initial = substitute(line, '^\([ \t]\)*\(\/\*\|\/\/\)\(.*\)', '\1\2', '')
+        let linenum = v:foldstart + 1
+        while linenum < v:foldend
+            let line = getline(linenum)
+            let comment_content = substitute(line, '^\([ \t\/\*]*\)\(.*\)$', '\2', 'g')
+            if comment_content != ''
+                break
+            endif
+            let linenum = linenum + 1
+        endwhile
+        let sub = initial . ' ' . comment_content
+    else
+        let sub = line
+        let startbrace = substitute(line, '^.*{[ \t]*$', '{', 'g')
+        if startbrace == '{'
+            let line = getline(v:foldend)
+            let endbrace = substitute(line, '^[ \t]*}\(.*\)$', '}', 'g')
+            if endbrace == '}'
+                let sub = sub.substitute(line, '^[ \t]*}\(.*\)$', '...}\1', 'g')
+            endif
+        endif
+    endif
+    let n = v:foldend - v:foldstart + 1
+    let info = " " . n . " "
+    let sub = sub . repeat(' ', 240)
+    let num_w = getwinvar(0, '&number') * getwinvar(0, '&numberwidth')
+    let fold_w = getwinvar(0, '&foldcolumn')
+    let sub = strpart(sub, 0, winwidth(0) - strlen(info) - num_w - fold_w - 2)
+    return sub . info
+endfunction
+set foldtext=MyFoldText()
 
 " Mouse motion {{{1
 nnoremap <ScrollWheelUp> 3<c-y>3k
@@ -214,13 +256,22 @@ command! VInstall normal VY:@"<cr>:VundleInstall<cr>
 
 " Colorscheme {{{1
 try
-    colorscheme lucius
-    command! Theme exec "LuciusDark" |
-        \ hi clear SignColumn |
-        \ hi link SignColumn LineNr |
-        \ hi clear FoldColumn |
-        \ hi link FoldColumn LineNr |
-        \ hi Comment ctermfg=246 guifg=#949494
+    function! ApplyTheme()
+        colorscheme lucius
+        LuciusDark
+        hi clear SignColumn
+        hi link SignColumn LineNr
+        " Make fold column stand out less
+        hi clear FoldColumn
+        hi FoldColumn ctermfg=250 ctermbg=238 guifg=#bcbcbc guibg=#444444
+        hi link FoldColumn LineNr
+        " Increase contrast for comments
+        hi Comment ctermfg=246 guifg=#949494
+        " Make folded stand out less
+        hi clear Folded
+        hi Folded ctermfg=250 ctermbg=237 guifg=#bcbcbc guibg=#3a3a3a
+    endfunction
+    command! Theme call ApplyTheme()
     Theme
 catch E185
 endtry
@@ -312,7 +363,8 @@ endif
 au FileType javascript
     \ let b:interpreter="node -es-staging %"|
     \ let b:repl_with_file="node -es-staging"|
-    \ let b:repl="node -es-staging"
+    \ let b:repl="node -es-staging"|
+    \ setlocal foldmethod=syntax
 function! SwitchSpecFile()
     if match(expand('%'), '\.[jt]s$') != -1
         if match(expand('%'), '\.spec\.[jt]s$') != -1
@@ -365,7 +417,7 @@ endif
 
 
 " HTML and templating {{{1
-au FileType html setlocal indentexpr=
+au FileType html setlocal matchpairs-=<:>
 au BufRead,BufNewFile *.md set ft=markdown
 au BufRead,BufNewFile *.hbs,*.swig set ft=html
 
@@ -393,7 +445,7 @@ endfunction
 au FileType cpp nmap <leader>s :call SwitchSourceHeader()<cr>
 
 " Vim .vim {{{1
-au FileType vim setlocal foldmethod=marker
+au FileType vim setlocal foldmethod=marker foldlevel=0
 
 
 " YAML .yaml {{{1
