@@ -1,3 +1,7 @@
+if [ -n "$SSH_CLIENT" ]; then
+    return
+fi
+
 # Initialize fzf and related fuzzy finding, if available
 if [ -f ~/.fzf.$SHELL_TYPE ]; then
     source ~/.fzf.$SHELL_TYPE

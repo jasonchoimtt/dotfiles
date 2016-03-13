@@ -40,5 +40,7 @@ alias vgit='vim . -c Gstatus'
 
 [ -f ~/.localrc ] && source ~/.localrc
 
-printf "$(_color_seq 244)You are at: $PWD @ $(hostname -f)$(_color_seq)\n"
+if [ -z "$SSH_CLIENT" ]; then
+    printf "$(_color_seq 244)You are at: $PWD @ $(hostname -f)$(_color_seq)\n"
+fi
 # vim:ft=zsh:
