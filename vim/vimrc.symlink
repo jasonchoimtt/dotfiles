@@ -455,8 +455,8 @@ au FileType yaml setlocal ts=2 sw=2 sts=2
 " Ruby .rb {{{1
 au FileType ruby
     \ let b:interpreter="ruby %"|
-    \ let b:repl_with_file="ruby"|
-    \ let b:repl="ruby"
+    \ let b:repl_with_file="irb -I . -r %"|
+    \ let b:repl="irb"
 
 
 " Java .java {{{1
