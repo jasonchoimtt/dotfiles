@@ -117,6 +117,12 @@ set hls incsearch
 nmap <silent> <esc><esc> :nohls<cr>
 "\|call QuickfixsignsUpdate()<cr>
 set timeout timeoutlen=3000 ttimeoutlen=10
+" Quickly insert word under cursor
+cmap <c-x>w <c-r>=expand('<cword>')<cr>
+cmap <c-x><c-w> \<<c-r>=expand('<cword>')<cr>\>
+" Quickly replace word under cursor
+nmap <leader>* :%s/\<<c-r>=expand('<cword>')<cr>\>/
+nmap <leader>g* :%s/<c-r>=expand('<cword>')<cr>/
 
 " Centering with foldcolumn and numberwidth (gutter) {{{1
 nmap <silent> [, :let &fdc-=1<cr>
@@ -134,10 +140,10 @@ vmap <silent> <leader>j gq
 nmap <silent> <leader>J vipJ
 
 " Add trailing character {{{1
-nmap <silent> <leader>, A,<esc>
-nmap <silent> <leader>; A;<esc>
-nmap <silent> <leader>} A}<esc>
-nmap <silent> <leader>) A)<esc>
+nmap <silent> <leader>, m`A,<esc>``
+nmap <silent> <leader>; m`A;<esc>``
+nmap <silent> <leader>} m`A}<esc>``
+nmap <silent> <leader>) m`A)<esc>``
 
 " Paste and keep cursor position {{{1
 nmap <silent> gp p`[
@@ -146,7 +152,7 @@ nmap <silent> gP P`[
 nmap <silent> gV `[v`]
 
 " Move line {{{1
-nmap <silent> <c-j> :move'>+1<cr>
+nmap <silent> <c-j> :move+1<cr>
 nmap <silent> <c-k> :move-2<cr>
 vmap <silent> <c-j> :move'>+1<cr>gv
 vmap <silent> <c-k> :move-2<cr>gv
@@ -343,6 +349,9 @@ endif
 
 " gitgutter {{{1
 let g:gitgutter_sign_column_always = 1
+nmap <silent> <Plug>TryFoldOpen @=(foldlevel('.')?'zO':'')<cr>
+nmap [c <Plug>GitGutterPrevHunk<Plug>TryFoldOpen
+nmap ]c <Plug>GitGutterNextHunk<Plug>TryFoldOpen
 
 " Python .py {{{1
 au FileType python
@@ -464,8 +473,7 @@ au FileType java
     \ setlocal omnifunc=javacomplete#Complete
 if ide
     au FileType java
-        \ NeoCompleteEnable
-        \|map <buffer> <leader>i :JCimportAdd<cr>
+        \ map <buffer> <leader>i :JCimportAdd<cr>
 endif
 
 
