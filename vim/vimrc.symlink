@@ -113,7 +113,7 @@ exec "nmap <silent> \e8 8gt"
 exec "nmap <silent> \e9 9gt"
 
 " Searching {{{1
-set hls incsearch
+set incsearch
 nmap <silent> <esc><esc> :nohls<cr>
 "\|call QuickfixsignsUpdate()<cr>
 set timeout timeoutlen=3000 ttimeoutlen=10
@@ -123,6 +123,12 @@ cmap <c-x><c-w> \<<c-r>=expand('<cword>')<cr>\>
 " Quickly replace word under cursor
 nmap <leader>* :%s/\<<c-r>=expand('<cword>')<cr>\>/
 nmap <leader>g* :%s/<c-r>=expand('<cword>')<cr>/
+" Search without hls quickly
+nmap <silent> g<space> :nohls<cr>
+nnoremap g? :set nohls<cr>?
+nnoremap g/ :set nohls<cr>/
+nnoremap / :let @/=''<cr>:set hls<cr>/
+nnoremap ? :let @/=''<cr>:set hls<cr>?
 
 " Centering with foldcolumn and numberwidth (gutter) {{{1
 nmap <silent> [, :let &fdc-=1<cr>
