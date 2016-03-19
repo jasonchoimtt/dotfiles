@@ -21,7 +21,7 @@ _color_seq() {
 source "$DOTFILES_ROOT/shell/fzf.sh"
 
 # Variables
-export PATH=~/local/bin:$PATH
+export PATH=~/local/bin:~/.dotfiles/bin:$PATH
 
 export CLICOLOR=true
 export LC_ALL="en_US.utf-8"

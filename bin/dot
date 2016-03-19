@@ -1,0 +1,37 @@
+#!/bin/bash
+
+DOTFILES_ROOT=~/.dotfiles
+
+cd $DOTFILES_ROOT
+
+if [ -z "$1" ]; then
+    echo "Usage: $(basename $0) [dotfile]"
+    exit 1
+fi
+
+if [[ "$1" == *"/"* ]]; then
+    name=$(echo "$1" | sed -e 's/\//.symlink\//')
+else
+    name="$1.symlink"
+fi
+
+# Symlinked file
+file=$(find -H "$DOTFILES_ROOT" -maxdepth 2 -path "*/$name" -not -path '*.git*' -print -quit)
+
+if [ -f "$file" ]; then
+    cd "$DOTFILES_ROOT"
+else
+    if [ -f "$DOTFILES_ROOT/$1" ]; then
+        # Direct file
+        file="$DOTFILES_ROOT/$1"
+        cd "$DOTFILES_ROOT"
+    elif [ -f "$HOME/.$1" ]; then
+        # File on home
+        file="$HOME/.$1"
+    else
+        echo "File not found"
+        exit 1
+    fi
+fi
+
+exec vim $file
