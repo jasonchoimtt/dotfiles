@@ -232,6 +232,7 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'tpope/vim-fugitive'
 
 if ide
+    Plugin 'embear/vim-localvimrc'
     Plugin 'AndrewRadev/splitjoin.vim'
     Plugin 'Raimondi/Delimitmate'
     Plugin 'alvan/vim-closetag'
@@ -308,6 +309,10 @@ nmap <silent> <leader>E :CtrlPBuffer<cr>
 nmap <leader>c :lcd %:p:h<cr>
 
 let g:ctrlp_working_path_mode = ''
+call system('which ag')
+if v:shell_error == 0
+    let g:ctrlp_user_command = 'ag -g "" %s'
+endif
 
 " Other editing magic {{{1
 if ide
@@ -331,6 +336,11 @@ if ide
     map <silent> ,h :HTTPClientDoRequest<cr>
 endif
 
+" Local .vimrc {{{1
+let g:localvimrc_name = ['__meta/.vimrc']
+let g:localvimrc_sandbox = 0
+let g:localvimrc_persistent = 2
+
 " }}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -342,6 +352,9 @@ if !empty($TMUX)
     command! W Write
     command! Wa wa | call system('tmux send-keys -t {last} C-c Up Enter')
 endif
+
+" Number of spaces {{{1
+command! -nargs=1 Spaces setlocal ts=<args> sw=<args> sts=<args>
 
 " syntastic {{{1
 if ide
