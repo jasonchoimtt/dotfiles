@@ -4,6 +4,7 @@
 [alias]
     st = status
     com = commit
+    commit-af = commit --amend --no-edit
 [core]
     excludesfile = ~/.gitignore
     editor = vim
