@@ -38,6 +38,27 @@ alias rm='rm -i'
 alias vimopen='vim -c CtrlP'
 alias vgit='vim . -c Gstatus'
 
+# Temporary environmental variable helpers
+doenv_docker() {
+    if which docker-machine > /dev/null; then
+        local env_str
+        if env_str=$(docker-machine env default 2> /dev/null); then
+            eval $env_str
+        fi
+    fi
+}
+
+doenv_python() {
+    [ -f venv/bin/activate ] && source venv/bin/activate
+}
+
+doenv() {
+    doenv_docker
+    doenv_python
+}
+
+
+# Local shell
 [ -f ~/.localrc ] && source ~/.localrc
 
 if [ -z "$SSH_CLIENT" ]; then
