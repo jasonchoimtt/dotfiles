@@ -34,8 +34,11 @@ alias l='ls'
 [ "$(uname -s)" != "Darwin" ] && alias ls='ls --color=auto'
 alias la='ls -al'
 alias rm='rm -i'
+alias mv='mv -i'
 
 alias vimopen='vim -c CtrlP'
+
+alias g='git'
 alias vgit='vim . -c Gstatus'
 
 # Temporary environmental variable helpers

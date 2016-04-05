@@ -8,6 +8,7 @@ endif
 
 " Basic config {{{1
 syntax on
+set nonu rnu nuw=3
 set ruler
 set ai si ci
 let lwd=getcwd() " cwd at launch
@@ -272,8 +273,11 @@ try
     function! ApplyTheme()
         colorscheme lucius
         LuciusDark
-        hi clear SignColumn
-        hi link SignColumn LineNr
+        " hi clear SignColumn
+        " hi link SignColumn LineNr
+        hi clear LineNr
+        hi clear CursorLineNr
+        hi LineNr ctermfg=241 guifg=#626262
         " Make fold column stand out less
         hi clear FoldColumn
         hi FoldColumn ctermfg=250 ctermbg=238 guifg=#bcbcbc guibg=#444444
@@ -301,8 +305,8 @@ if ide
 endif
 
 " File navigation {{{1
-nmap <silent> <leader>t :exec 'NERDTreeToggle '.lwd<cr>
-nmap <silent> <leader>T :exec 'NERDTreeToggle'<cr>
+nmap <silent> <leader>t :NERDTreeToggle<cr>
+nmap <silent> <leader>T :NERDTreeFind<cr>
 nmap <silent> <leader>e :CtrlP<cr>
 nmap <silent> <c-f> :CtrlP<cr>
 nmap <silent> <leader>E :CtrlPBuffer<cr>
@@ -448,6 +452,9 @@ endif
 au FileType html setlocal matchpairs-=<:>
 au BufRead,BufNewFile *.md set ft=markdown
 au BufRead,BufNewFile *.hbs,*.swig set ft=html
+if ide
+    let g:syntastic_html_checkers = []
+endif
 
 
 " Rust .rs {{{1

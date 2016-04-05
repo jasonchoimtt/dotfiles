@@ -32,7 +32,7 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
             done
         }
 
-        export cdxpath=(~/w ~/Dropbox/CUHK)
+        cdxpath=(~/w ~/Dropbox/CUHK)
         _xcd_impl() {
             local opts=""
             [ -n $LBUFFER ] && opts="--multi"
