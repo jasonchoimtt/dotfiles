@@ -3,8 +3,12 @@
     path = ~/.gitconfig.local
 [alias]
     st = status
+    ch = checkout
     com = commit
     commit-af = commit --amend --no-edit
+    merge-ff = merge --ff-only
+    log = log ---graph --decorate
+    vlog = log --graph --decorate --pretty=short --abbrev-commit
 [core]
     excludesfile = ~/.gitignore
     editor = vim
