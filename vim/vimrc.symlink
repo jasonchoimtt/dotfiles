@@ -360,6 +360,56 @@ endif
 " Number of spaces {{{1
 command! -nargs=1 Spaces setlocal ts=<args> sw=<args> sts=<args>
 
+" Auto readonly {{{1
+function! ConfigReadOnly()
+    if match(expand('%'), '\<node_modules\>') != -1
+        setlocal ro noma
+    endif
+endfunction
+autocmd BufRead * call ConfigReadOnly()
+
+" Switch file {{{1
+function! SuperSwitchFile()
+    let spec = matchstr(expand('%'), '\.spec\.[jt]sx\?$')
+    let ext = matchstr(expand('%'), '\.[^.]\+$')
+    if ext == '.ts' || ext == '.js' || ext == '.jsx'
+        if !empty(spec)
+            exec 'edit %:r:r'.ext
+        else
+            exec 'edit %:r.spec'.ext
+        endif
+    elseif ext == '.css' || ext == '.scss' || ext == '.html'
+        try
+            find %:r.ts
+        catch /E345/
+            try
+                find %:r.js
+            catch /E345/
+                echo "No js/ts file found"
+            endtry
+        endtry
+    elseif ext == '.c' || ext == '.cpp'
+        edit %:r.h
+    elseif ext == '.h'
+        try
+            find %:r.c
+        catch /E345/
+            try
+                find %:r.cpp
+            catch /E345/
+                echo "No c/cpp file found"
+            endtry
+        endtry
+    endif
+endfunction
+function! SwitchFile(ext)
+    exec 'edit %:r.'.a:ext
+endfunction
+map <silent> <leader>s :call SuperSwitchFile()<cr>
+map <silent> <leader>ah :call SwitchFile('html')<cr>
+map <silent> <leader>ac :call SwitchFile('css')<cr>
+map <silent> <leader>as :call SwitchFile('scss')<cr>
+
 " syntastic {{{1
 if ide
     let g:syntastic_always_populate_loc_list = 1
@@ -397,16 +447,6 @@ au FileType javascript
     \ let b:repl_with_file="node -es-staging"|
     \ let b:repl="node -es-staging"|
     \ setlocal foldmethod=syntax
-function! SwitchSpecFile()
-    if match(expand('%'), '\.[jt]s$') != -1
-        if match(expand('%'), '\.spec\.[jt]s$') != -1
-            exec 'edit '.substitute(expand('%'), '\.spec\(\.[jt]s\)', '\1', '')
-        else
-            exec 'edit '.substitute(expand('%'), '\(\.[jt]s\)', '.spec\1', '')
-        endif
-    endif
-endfunction
-map <silent> <leader>s :call SwitchSpecFile()<cr>
 if ide
     let g:javascript_enable_domhtmlcss = 1
     let g:syntastic_javascript_checkers = ["eslint"]
@@ -463,21 +503,6 @@ if ide
         \ compiler rustc
 endif
 
-
-" C/C++ .c .cpp {{{1
-function! SwitchSourceHeader()
-    "update!
-    if (expand ("%:e") == "cpp")
-        find %:t:r.h
-    else
-        try
-            find %:t:r.c
-        catch /E345/
-            find %:t:r.cpp
-        endtry
-    endif
-endfunction
-au FileType cpp nmap <leader>s :call SwitchSourceHeader()<cr>
 
 " Vim .vim {{{1
 au FileType vim setlocal foldmethod=marker foldlevel=0
