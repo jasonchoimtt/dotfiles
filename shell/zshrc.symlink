@@ -18,6 +18,7 @@ zstyle ':completion:*' cache-path ~/.cache/zsh
 compinit
 
 autoload -U tetris
+tetris 2> /dev/null
 
 # CD recent
 autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
@@ -30,7 +31,7 @@ source "$DOTFILES_ROOT/shell/index.sh"
 # Prompt
 _get_git_branch() {
     local branch
-    branch=$([ -d .git ] && git branch 2>/dev/null | while read line; do
+    branch=$(git branch 2>/dev/null | while read line; do
         [ $line '=~' '\* .*' ] && echo ${line[3,${#line}]}
     done)
     echo ${branch:+$branch$1}
@@ -38,7 +39,7 @@ _get_git_branch() {
 
 setopt PROMPT_SUBST
 prompt_color() {
-    PS1="%F{$1}\$(_get_git_branch :)%c $ %f"
+    PS1="%F{$1}\$(_get_git_branch :)%c %(?.$.%F{161}$%f) %f"
 }
 prompt_color $PROMPT_COLOR
 
