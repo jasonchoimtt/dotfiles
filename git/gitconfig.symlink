@@ -2,7 +2,7 @@
 [include]
     path = ~/.gitconfig.local
 [alias]
-    st = status
+    st = status -s -b
     ch = checkout
     com = commit
     commit-af = commit --amend --no-edit

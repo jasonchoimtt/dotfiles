@@ -17,6 +17,8 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
             if [[ -z $lbuf && -n $LBUFFER ]]; then
                 LBUFFER="$1 $LBUFFER"
                 zle accept-line
+            else
+                false
             fi
         }
 
@@ -69,6 +71,18 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
         xvimopen() { _lazycomp 'vim' _xvimopen_impl; }
         zle -N xvimopen
         bindkey '\Cf' xvimopen
+
+        _xgitstatus_impl() {
+            git -c color.status=always status -s | _fzf_complete "--ansi --nth=2" "$LBUFFER"
+        }
+        _xgitstatus_impl_post() {
+            cut -b 3- | while read item; do
+                echo "${$(printf "%q" "$item")/\\~/~}"
+            done
+        }
+        xgitstatus() { _lazycomp 'vim' _xgitstatus_impl; }
+        zle -N xgitstatus
+        bindkey '\Cxg' xgitstatus
     fi
 else
     if [ $SHELL_TYPE '==' bash ]; then
