@@ -27,6 +27,7 @@ export CLICOLOR=true
 export LC_ALL="en_US.utf-8"
 export EDITOR=vim
 export MANPAGER="bash -c \"vim -n -c 'setl ft=man ro nomod noma' -c 'nmap q ZQ' -c 'sign unplace *' </dev/tty <(col -b)\""
+export LESS="-R"
 
 
 # Aliases
@@ -40,6 +41,25 @@ alias vimopen='vim -c CtrlP'
 
 alias g='git'
 alias vgit='vim . -c Gstatus'
+
+if which ag > /dev/null; then
+    alias \?='ag --pager "less"'
+fi
+
+if [ -n "$TMUX" ]; then
+    alias s='tmux split-window'
+fi
+
+mn() {
+    $1 --help 2>&1 | less -R
+}
+
+# Horizontal rule
+HR_COLOR=24
+hr() {
+    _color_seq $HR_COLOR "$(printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' '▁')"
+    _color_seq $HR_COLOR "$(printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' '▔')"
+}
 
 # Temporary environmental variable helpers
 doenv_docker() {
