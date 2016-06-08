@@ -68,12 +68,31 @@ esac
 
 # Quickly vim
 fg_vim() {
-    fg %vim 2>/dev/null
+    if jobs %vim 2>/dev/null; then
+        fg %vim 2>/dev/null
+    elif jobs %view 2>/dev/null; then
+        fg %view 2>/dev/null
+    elif jobs %dot 2>/dev/null; then
+        fg %dot 2>/dev/null
+    else
+        BUFFER="vim"
+        zle accept-line
+    fi
     precmd
     zle redisplay
 }
 zle -N fg_vim
 bindkey '\Cz' fg_vim
+
+if [ -n "$TMUX" ]; then
+    xvimopen() {
+        if jobs %vim 2>/dev/null; then
+            tmux send-keys C-z C-f
+        else
+            _lazycomp 'vim' _xvimopen_impl
+        fi
+    }
+fi
 
 # Cowtune
 zle-line-init() {
