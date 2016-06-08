@@ -18,8 +18,6 @@ _color_seq() {
 
 [ -z "$PROMPT_COLOR" ] && PROMPT_COLOR=4
 
-source "$DOTFILES_ROOT/shell/fzf.sh"
-
 # Variables
 export PATH=~/local/bin:~/.dotfiles/bin:$PATH
 
@@ -39,6 +37,17 @@ alias mv='mv -i'
 
 alias vimopen='vim -c CtrlP'
 
+if [ $SHELL_TYPE '==' zsh ]; then
+    _vimopen() {
+        BUFFER="vimopen"
+        zle accept-line
+    }
+    zle -N _vimopen
+    bindkey '\Cf' _vimopen
+else
+    bind -x '"\C-f": "vimopen"'
+fi
+
 alias g='git'
 alias vgit='vim . -c Gstatus'
 
@@ -53,6 +62,8 @@ fi
 mn() {
     $1 --help 2>&1 | less -R
 }
+
+source "$DOTFILES_ROOT/shell/fzf.sh"
 
 # Horizontal rule
 HR_COLOR=24
