@@ -180,10 +180,10 @@ set complete+=b " Search other open buffers for keywords
 " ctrl-space
 inoremap <c-@> <c-x><c-o>
 function! CleverTab()
-   if strpart( getline('.'), 0, col('.')-1 ) =~ '^\%(\s\|-\)*$'
-      return "\<tab>"
-   else
+   if strpart(getline('.'), 0, col('.')-1) =~ '[A-Za-z_$]\+$'
       return "\<c-n>"
+   else
+      return "\<tab>"
    endif
 endfunction
 " Keyword complete
@@ -253,8 +253,8 @@ if ide
     Plugin 'Quramy/vim-js-pretty-template'
     Plugin 'kchmck/vim-coffee-script'
     Plugin 'leafgarland/typescript-vim'
-    " Plugin 'Shougo/vimproc' " Required for tsuquyomi
-    " Plugin 'Quramy/tsuquyomi' " TypeScript omnicomplete
+    Plugin 'Shougo/vimproc' " Required for tsuquyomi
+    Plugin 'Quramy/tsuquyomi' " TypeScript omnicomplete
     Plugin 'plasticboy/vim-markdown'
     Plugin 'digitaltoad/vim-pug'
     Plugin 'rust-lang/rust.vim'
@@ -267,6 +267,9 @@ call vundle#end()
 filetype plugin indent on
 
 command! VInstall normal VY:@"<cr>:VundleInstall<cr>
+
+nmap [oN :NeoCompleteEnable<cr>
+nmap ]oN :NeoCompleteEnable<cr>
 
 " Colorscheme {{{1
 try
@@ -312,6 +315,7 @@ nmap <silent> <c-f> :CtrlP<cr>
 nmap <silent> <leader>E :CtrlPBuffer<cr>
 nmap <leader>c :lcd %:p:h<cr>
 
+let g:ctrlp_map = ''
 let g:ctrlp_working_path_mode = ''
 call system('which ag')
 if v:shell_error == 0
@@ -463,8 +467,13 @@ au FileType coffee setlocal ts=2 sw=2 sts=2
 if ide
     let g:typescript_compiler_options='--sourcemap --module commonjs'
     let g:typescript_indent_disable = 1
-    let g:syntastic_typescript_checkers = ["tslint"]
-    let g:tsuquyomi_definition_split = 3
+    let g:syntastic_typescript_checkers = ['tslint', 'tsuquyomi']
+    " let g:tsuquyomi_definition_split = 3
+
+    " Workaround for splitjoin somehow breaking for typescript
+    au FileType typescript
+        \ unlet b:splitjoin_split_callbacks b:splitjoin_join_callbacks|
+        \ source ~/.vim/bundle/splitjoin.vim/ftplugin/typescript/splitjoin.vim
 endif
 
 
