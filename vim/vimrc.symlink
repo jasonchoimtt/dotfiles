@@ -1,6 +1,9 @@
 set nocompatible
 
 let ide = 0
+let ide_use = {}
+" Valid keys:
+" python, javascript, coffeescript, typescript, rust, android, java
 
 if filereadable(expand('~/.vimrc_local'))
     source ~/.vimrc_local
@@ -11,6 +14,7 @@ syntax on
 set nonu rnu nuw=3
 set ruler
 set ai si ci
+set bs=2
 let lwd=getcwd() " cwd at launch
 set ts=4 sw=4 et sts=4
 set wrap linebreak
@@ -29,7 +33,10 @@ set hidden
 set viminfo+=f1
 set splitright
 
-set nofileignorecase
+try
+    set nofileignorecase
+catch E518
+endtry
 set wildignore+=.git,venv,__pycache__,node_modules,elm-stuff,build,gradle
 
 set mouse=a
@@ -94,6 +101,9 @@ nmap <C-ScrollWheelUp> k
 nmap <C-ScrollWheelDown> j
 nmap <M-ScrollWheelUp> <c-y>
 nmap <M-ScrollWheelDown> <c-e>
+
+nmap <silent> <c-p> 6k
+nmap <silent> <c-n> 6j
 
 " Window and tab navigation {{{1
 nmap <tab> <c-w><c-w>
@@ -247,19 +257,34 @@ if ide
     Plugin 'honza/vim-snippets'
 
     Plugin 'ap/vim-css-color'
-    Plugin 'klen/python-mode'
-    Plugin 'pangloss/vim-javascript'
-    " Plugin 'moll/vim-node'
-    Plugin 'Quramy/vim-js-pretty-template'
-    Plugin 'kchmck/vim-coffee-script'
-    Plugin 'leafgarland/typescript-vim'
-    Plugin 'Shougo/vimproc' " Required for tsuquyomi
-    Plugin 'Quramy/tsuquyomi' " TypeScript omnicomplete
+    if has_key(ide_use, 'python')
+        Plugin 'davidhalter/jedi-vim'
+        " Plugin 'klen/python-mode'
+    endif
+    if has_key(ide_use, 'javascript')
+        Plugin 'pangloss/vim-javascript'
+        Plugin 'ternjs/tern_for_vim'
+        Plugin 'Quramy/vim-js-pretty-template'
+    endif
+    if has_key(ide_use, 'coffeescript')
+        Plugin 'kchmck/vim-coffee-script'
+    endif
+    if has_key(ide_use, 'typescript')
+        Plugin 'leafgarland/typescript-vim'
+        Plugin 'Shougo/vimproc' " Required for tsuquyomi
+        Plugin 'Quramy/tsuquyomi' " TypeScript omnicomplete
+    endif
     Plugin 'plasticboy/vim-markdown'
     Plugin 'digitaltoad/vim-pug'
-    Plugin 'rust-lang/rust.vim'
-    Plugin 'hsanson/vim-android'
-    Plugin 'artur-shaik/vim-javacomplete2'
+    if has_key(ide_use, 'rust')
+        Plugin 'rust-lang/rust.vim'
+    endif
+    if has_key(ide_use, 'android')
+        Plugin 'hsanson/vim-android'
+    endif
+    if has_key(ide_use, 'java')
+        Plugin 'artur-shaik/vim-javacomplete2'
+    endif
 endif
 
 call vundle#end()
@@ -414,6 +439,9 @@ map <silent> <leader>ah :call SwitchFile('html')<cr>
 map <silent> <leader>ac :call SwitchFile('css')<cr>
 map <silent> <leader>as :call SwitchFile('scss')<cr>
 
+" neocomplete
+let g:neocomplete#enable_ignore_case = 0
+
 " syntastic {{{1
 if ide
     let g:syntastic_always_populate_loc_list = 1
@@ -436,11 +464,18 @@ au FileType python
     \ let b:interpreter="python3 %"|
     \ let b:repl_with_file="python3 -i %"|
     \ let b:repl="python3"
-if ide
-    let g:pymode_lint = 0
-    let g:pymode_virtualenv = 0
-    let g:pymode_rope = 0
-    let g:pymode_run = 0
+if has_key(ide_use, 'python')
+    " Anti-clash config
+    let g:jedi#auto_vim_configuration = 0
+    let g:jedi#popup_on_dot = 0
+    let g:jedi#popup_select_first = 0
+    let g:jedi#smart_auto_mappings = 0
+    let g:jedi#smart_auto_mappings = 0
+
+    " Consistent with TypeScript plugin
+    let g:jedi#goto_command = '<c-]>'
+    let g:jedi#rename_command = '<c-^>'
+
     let g:syntastic_python_checkers = ["pyflakes"]
 endif
 
@@ -451,7 +486,7 @@ au FileType javascript
     \ let b:repl_with_file="node -es-staging"|
     \ let b:repl="node -es-staging"|
     \ setlocal foldmethod=syntax
-if ide
+if has_key(ide_use, 'javascript')
     let g:javascript_enable_domhtmlcss = 1
     let g:syntastic_javascript_checkers = ["eslint"]
     let g:snipMate.scope_aliases['javascript'] = 'javascript,javascript.es6'
@@ -460,15 +495,16 @@ endif
 
 
 " CoffeeScript .coffee .{{{1
-au FileType coffee set makeprg= " Accidental compilation may shield the .coffee
-au FileType coffee setlocal ts=2 sw=2 sts=2
+if has_key(ide_use, 'coffeescript')
+    au FileType coffee set makeprg= " Accidental compilation may shield the .coffee
+    au FileType coffee setlocal ts=2 sw=2 sts=2
+endif
 
 " TypeScript .ts {{{1
-if ide
+if has_key(ide_use, 'typescript')
     let g:typescript_compiler_options='--sourcemap --module commonjs'
     let g:typescript_indent_disable = 1
     let g:syntastic_typescript_checkers = ['tslint', 'tsuquyomi']
-    " let g:tsuquyomi_definition_split = 3
 
     " Workaround for splitjoin somehow breaking for typescript
     au FileType typescript
@@ -507,7 +543,7 @@ endif
 
 
 " Rust .rs {{{1
-if ide
+if has_key(ide_use, 'rust')
     au FileType rust setlocal cc=100|
         \ compiler rustc
 endif
@@ -529,9 +565,9 @@ au FileType ruby
 
 
 " Java .java {{{1
-au FileType java
-    \ setlocal omnifunc=javacomplete#Complete
-if ide
+if has_key(ide_use, 'java')
+    au FileType java
+        \ setlocal omnifunc=javacomplete#Complete
     au FileType java
         \ map <buffer> <leader>i :JCimportAdd<cr>
 endif
