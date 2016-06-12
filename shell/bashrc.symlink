@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export DOTFILES_ROOT=~/.dotfiles
 source "$DOTFILES_ROOT/shell/feature-detection.sh"
 
 # Prompt
@@ -13,7 +14,6 @@ if [ -n "$BREW_PREFIX" ] && [ -f "$BREW_PREFIX/etc/bash_completion" ]; then
     source $BREW_PREFIX/etc/bash_completion
 fi
 
-export DOTFILES_ROOT=~/.dotfiles
 source "$DOTFILES_ROOT/shell/index.sh"
 
 # Prompt

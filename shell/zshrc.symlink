@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+export DOTFILES_ROOT=~/.dotfiles
 source "$DOTFILES_ROOT/shell/feature-detection.sh"
 
 export SHELL=$(which zsh)
@@ -29,7 +30,6 @@ autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
 add-zsh-hook chpwd chpwd_recent_dirs
 zstyle ':completion:*' menu selection
 
-export DOTFILES_ROOT=~/.dotfiles
 source "$DOTFILES_ROOT/shell/index.sh"
 
 # Prompt
