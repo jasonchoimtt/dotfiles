@@ -1,6 +1,3 @@
-[ -n "$BASH_VERSION" ] && SHELL_TYPE=bash
-[ -n "$ZSH_VERSION" ] && SHELL_TYPE=zsh
-
 # Utility
 _color_seq() {
     local color=$1

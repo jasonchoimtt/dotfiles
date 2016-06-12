@@ -1,4 +1,6 @@
 #!/usr/bin/env zsh
+source "$DOTFILES_ROOT/shell/feature-detection.sh"
+
 export SHELL=$(which zsh)
 bindkey -e  # emacs keys
 
@@ -11,7 +13,9 @@ setopt HIST_IGNORE_DUPS
 
 
 # Auto-completion
-fpath=(/usr/local/share/zsh-completions $fpath)
+if [ -n "$BREW_PREFIX" ] && [ -d "$BREW_PREFIX/share/zsh-completions" ]; then
+    fpath=($BREW_PREFIX/share/zsh-completions $fpath)
+fi
 autoload -U compinit
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.cache/zsh
@@ -94,15 +98,10 @@ if [ -n "$TMUX" ]; then
     }
 fi
 
-# Cowtune
-zle-line-init() {
-    zle -M -c "$(cowtune)"
-    zle-line-init() {
-    }
-}
-zle -N zle-line-init
-
 # Syntax highlighting
 # Must be at the bottom
-[ -f /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ] \
-    && source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+if [ -n "$BREW_PREFIX" ] && [ -f $BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+    source $BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
+true # Avoid error exit status

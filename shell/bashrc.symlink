@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+source "$DOTFILES_ROOT/shell/feature-detection.sh"
+
 # Prompt
 
 # History control
@@ -7,8 +9,8 @@ HISTSIZE=3000
 HISTFILESIZE=3000
 
 # Completion
-if which brew >/dev/null; then
-    [ -f $(brew --prefix)/etc/bash_completion ] && source $(brew --prefix)/etc/bash_completion
+if [ -n "$BREW_PREFIX" ] && [ -f "$BREW_PREFIX/etc/bash_completion" ]; then
+    source $BREW_PREFIX/etc/bash_completion
 fi
 
 export DOTFILES_ROOT=~/.dotfiles
