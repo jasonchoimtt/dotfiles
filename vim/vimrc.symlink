@@ -94,6 +94,9 @@ function! MyFoldText()
 endfunction
 set foldtext=MyFoldText()
 
+nmap [oF :setlocal fdm=syntax<cr>
+nmap ]oF :setlocal fdm=manual<cr>
+
 " Mouse motion {{{1
 nnoremap <ScrollWheelUp> 3<c-y>3k
 nnoremap <ScrollWheelDown> 3<c-e>3j
@@ -136,10 +139,10 @@ nmap <leader>* :%s/\<<c-r>=expand('<cword>')<cr>\>/
 nmap <leader>g* :%s/<c-r>=expand('<cword>')<cr>/
 " Search without hls quickly
 nmap <silent> g<space> :nohls<cr>
-nnoremap g? :set nohls<cr>?
-nnoremap g/ :set nohls<cr>/
-nnoremap / :let @/=''<cr>:set hls<cr>/
-nnoremap ? :let @/=''<cr>:set hls<cr>?
+nnoremap g? :setl nohls<cr>?
+nnoremap g/ :setl nohls<cr>/
+nnoremap / :let @/=''<cr>:setl hls<cr>/
+nnoremap ? :let @/=''<cr>:setl hls<cr>?
 
 " Centering with foldcolumn and numberwidth (gutter) {{{1
 nmap <silent> [, :let &fdc-=1<cr>
@@ -212,6 +215,8 @@ endif
 nmap <silent> <leader>i :exec '!'.b:repl<cr>
 nmap <silent> <leader>I :exec '!'.b:repl_with_file<cr>
 nmap ZS :up<cr><c-z>
+
+command! -range=% ClangFormat exec 'normal m`'|exec '<line1>,<line2>!clang-format "--assume-filename=%:t" --style=file'|exec 'normal ``'
 
 " }}}
 
@@ -340,11 +345,15 @@ nmap <silent> <c-f> :CtrlP<cr>
 nmap <silent> <leader>E :CtrlPBuffer<cr>
 nmap <leader>c :lcd %:p:h<cr>
 
+let NERDTreeShowBookmarks = 1
+
 let g:ctrlp_map = ''
 let g:ctrlp_working_path_mode = ''
 call system('which ag')
 if v:shell_error == 0
     let g:ctrlp_user_command = 'ag -g "" %s'
+    set grepprg=ag\ --vimgrep\ $*
+    set grepformat=%f:%l:%c:%m
 endif
 
 " Other editing magic {{{1
@@ -528,7 +537,6 @@ if ide
         \ syn clear mkdMath |
         \ syn region mkdMath matchgroup=mkdDelimiter start="\\\@<!\$" end="\$" oneline |
         \ syn region mkdMath matchgroup=mkdDelimiter start="\\\@<!\$\$" end="\$\$"
-    let g:vim_markdown_folding_disabled = 1
     let g:vim_markdown_frontmatter = 1
 endif
 
