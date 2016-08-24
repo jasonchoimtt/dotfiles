@@ -66,14 +66,14 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
         bindkey '\Cxf' xvim
 
         _xvimopen_impl() {
-            ag -g "" | _fzf_complete_quoted "" "$LBUFFER"
+            ag -g "" | _fzf_complete_quoted "--multi" "$LBUFFER"
         }
         xvimopen() { _lazycomp 'vim' _xvimopen_impl; }
         zle -N xvimopen
         bindkey '\Cf' xvimopen
 
         _xgitstatus_impl() {
-            git -c color.status=always status -s | _fzf_complete "--ansi --nth=2" "$LBUFFER"
+            git -c color.status=always status -s | _fzf_complete "--multi --ansi --nth=2" "$LBUFFER"
         }
         _xgitstatus_impl_post() {
             cut -b 3- | while read item; do
@@ -83,6 +83,21 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
         xgitstatus() { _lazycomp 'vim' _xgitstatus_impl; }
         zle -N xgitstatus
         bindkey '\Cxg' xgitstatus
+
+        _xgitlog_impl() {
+            local commit=HEAD
+            [[ -n "$gref" ]] && commit=$gref
+            local count=$(( $(git rev-list --count $commit) - 1 ))
+            local min=$(( $count > 9 ? 9 : $count ))
+            git --no-pager log --pretty=oneline --color --abbrev-commit $commit~$min..$commit | \
+                _fzf_complete "--multi --ansi --nth=1" "$LBUFFER"
+        }
+        _xgitlog_impl_post() {
+            cut -d ' ' -f 1
+        }
+        xgitlog() { _xgitlog_impl; }
+        zle -N xgitlog
+        bindkey '\CxG' xgitlog
     fi
 else
     if [ $SHELL_TYPE '==' bash ]; then
