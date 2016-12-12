@@ -10,6 +10,7 @@
     log = log ---graph --decorate
     vlog = log --graph --decorate --pretty=short --abbrev-commit
     wc = whatchanged
+    cp = cherry-pick
 [core]
     excludesfile = ~/.gitignore
     editor = vim
