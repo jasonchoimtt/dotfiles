@@ -72,6 +72,13 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
         zle -N xvimopen
         bindkey '\Cf' xvimopen
 
+        _xopen_impl() {
+            ag -g "" | _fzf_complete_quoted "--multi" "$LBUFFER"
+        }
+        xopen() { _lazycomp 'open' _xopen_impl; }
+        zle -N xopen
+        bindkey '\Cxo' xopen
+
         _xgitstatus_impl() {
             git -c color.status=always status -s | _fzf_complete "--multi --ansi --nth=2" "$LBUFFER"
         }
