@@ -13,7 +13,7 @@ endif
 syntax on
 set nonu rnu nuw=3
 set ruler
-set ai si ci
+set ai nosi ci
 set bs=2
 let lwd=getcwd() " cwd at launch
 set ts=4 sw=4 et sts=4
@@ -61,6 +61,7 @@ autocmd InsertLeave * setlocal list
 " Set a nicer foldtext function
 function! MyFoldText()
     let line = getline(v:foldstart)
+    let line = substitute(line, '\e[^m]*m', '', 'g')
     if match(line, '^[ \t]*\(\/\*\|\/\/\)[*/\\]*[ \t]*$') == 0
         let initial = substitute(line, '^\([ \t]\)*\(\/\*\|\/\/\)\(.*\)', '\1\2', '')
         let linenum = v:foldstart + 1
@@ -95,6 +96,7 @@ endfunction
 set foldtext=MyFoldText()
 
 nmap [oF :setlocal fdm=syntax<cr>
+nmap [oM :setlocal fdm=marker<cr>zR
 nmap ]oF :setlocal fdm=manual<cr>
 
 " Mouse motion {{{1
@@ -162,6 +164,8 @@ nmap <silent> <leader>J vipJ
 " Add trailing character {{{1
 nmap <silent> <leader>, m`A,<esc>``
 nmap <silent> <leader>; m`A;<esc>``
+nmap <silent> <leader>. m`A.<esc>``
+nmap <silent> <leader>$ m`$gea.<esc>``
 nmap <silent> <leader>} m`A}<esc>``
 nmap <silent> <leader>) m`A)<esc>``
 
@@ -215,8 +219,17 @@ endif
 nmap <silent> <leader>i :exec '!'.b:repl<cr>
 nmap <silent> <leader>I :exec '!'.b:repl_with_file<cr>
 nmap ZS :up<cr><c-z>
+" Requires 'stty -ixon' in bashrc
+nmap <c-s> :w<cr>
+nmap <c-q> :q<cr>
+nmap <leader><c-s> :W<cr>
+nmap <leader><c-m> :TmuxSaveSwitchRerunWindow<cr>
 
 command! -range=% ClangFormat exec 'normal m`'|exec '<line1>,<line2>!clang-format "--assume-filename=%:t" --style=file'|exec 'normal ``'
+" Screen capture {{{1
+function! DoScreenCapture()
+endfunction
+command! ScreenCapture call DoScreenCapture()
 
 " }}}
 
@@ -246,6 +259,7 @@ Plugin 'Valloric/ListToggle'
 Plugin 'kshenoy/vim-signature'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'tpope/vim-fugitive'
+Plugin 'justinmk/vim-sneak'
 
 if ide
     Plugin 'embear/vim-localvimrc'
@@ -259,9 +273,9 @@ if ide
     Plugin 'MarcWeber/vim-addon-mw-utils'
     Plugin 'tomtom/tlib_vim'
     Plugin 'garbas/vim-snipmate'
-    Plugin 'honza/vim-snippets'
 
     Plugin 'ap/vim-css-color'
+    Plugin 'vim-scripts/AnsiEsc.vim'
     if has_key(ide_use, 'python')
         Plugin 'davidhalter/jedi-vim'
         " Plugin 'klen/python-mode'
@@ -300,6 +314,8 @@ command! VInstall normal VY:@"<cr>:VundleInstall<cr>
 
 nmap [oN :NeoCompleteEnable<cr>
 nmap ]oN :NeoCompleteEnable<cr>
+nmap [C :set conceallevel=1<cr>
+nmap ]C :set conceallevel=0<cr>
 
 " Colorscheme {{{1
 try
@@ -320,6 +336,8 @@ try
         " Make folded stand out less
         hi clear Folded
         hi Folded ctermfg=250 ctermbg=237 guifg=#bcbcbc guibg=#3a3a3a
+        " Make coneal look normal
+        hi clear Conceal
     endfunction
     command! Theme call ApplyTheme()
     Theme
@@ -330,6 +348,7 @@ endtry
 if ide
     let g:snipMate = {}
     let g:snipMate.scope_aliases = {}
+    let g:snipMate['no_match_completion_feedkeys_chars'] = ''
     let g:snipMate.snippet_version = 1
     imap <c-h> <Plug>snipMateNextOrTrigger
     imap <c-x><c-h> <Plug>snipMateShow
@@ -369,7 +388,29 @@ if ide
     let delimitMate_nesting_quotes = ["'","`"]
     let delimitMate_expand_space = 1
     let delimitMate_excluded_regions = "Comment,String"
+
+    " surround
+    nmap <silent> gs ysiw
+    nmap <silent> gS ysiW
+    nmap <silent> g( ysiw)i
+    nmap <silent> g[ ysiw]i
+    nmap <silent> <leader>( ysiW)i
+    nmap <silent> <leader>[ ysiW]i
+
+    " sneak
+    nmap r <Plug>Sneak_s
+    nmap R <Plug>Sneak_S
+    xmap r <Plug>Sneak_s
+    xmap R <Plug>Sneak_S
+    omap r <Plug>Sneak_s
+    omap R <Plug>Sneak_S
+
+    " AnsiEsc.vim
+    nmap ,A :AnsiEsc<cr>
 endif
+
+" exec "nmap <silent> \eO O<cr><c-o>k"
+" exec "nmap <silent> \eo o<cr>"
 
 
 " HTTP client {{{1
@@ -393,6 +434,7 @@ if !empty($TMUX)
     command! Write w | call system('tmux send-keys -t {last} C-c Up Enter')
     command! W Write
     command! Wa wa | call system('tmux send-keys -t {last} C-c Up Enter')
+    command! TmuxSaveSwitchRerunWindow w | call system('tmux last-window \; send-keys C-c Up Enter')
 endif
 
 " Number of spaces {{{1
@@ -467,12 +509,17 @@ nmap <silent> <Plug>TryFoldOpen @=(foldlevel('.')?'zO':'')<cr>
 nmap [c <Plug>GitGutterPrevHunk<Plug>TryFoldOpen
 nmap ]c <Plug>GitGutterNextHunk<Plug>TryFoldOpen
 
+" C .c/C++ .cpp {{{1
+let g:syntastic_cpp_compiler_options = '-Wall -std=c++11'
 " Python .py {{{1
 au FileType python
     \ setlocal foldlevel=2|
     \ let b:interpreter="python3 %"|
     \ let b:repl_with_file="python3 -i %"|
     \ let b:repl="python3"
+
+let g:pyindent_open_paren = '&sw'
+let g:pyindent_continue = '&sw'
 if has_key(ide_use, 'python')
     " Anti-clash config
     let g:jedi#auto_vim_configuration = 0
@@ -480,12 +527,16 @@ if has_key(ide_use, 'python')
     let g:jedi#popup_select_first = 0
     let g:jedi#smart_auto_mappings = 0
     let g:jedi#smart_auto_mappings = 0
+    let g:jedi#show_call_signatures = 2
 
     " Consistent with TypeScript plugin
     let g:jedi#goto_command = '<c-]>'
     let g:jedi#rename_command = '<c-^>'
 
     let g:syntastic_python_checkers = ["pyflakes"]
+
+    au FileType python
+      \ let b:delimitMate_nesting_quotes = ['"', "'"]
 endif
 
 
@@ -513,7 +564,7 @@ endif
 if has_key(ide_use, 'typescript')
     let g:typescript_compiler_options='--sourcemap --module commonjs'
     let g:typescript_indent_disable = 1
-    let g:syntastic_typescript_checkers = ['tslint', 'tsuquyomi']
+    let g:syntastic_typescript_checkers = ['tsuquyomi']
 
     " Workaround for splitjoin somehow breaking for typescript
     au FileType typescript
@@ -529,15 +580,28 @@ au BufRead,BufNewFile *.elm set ft=haskell
 " Markdown .md {{{1
 au FileType markdown
     \ let &l:makeprg='mark -o "%:r.pdf" "%" && open "%:r.pdf"'|
+    \ setl matchpairs-=<:>|
     \ nmap <buffer> <f1> :up<cr>:Make!<cr>|
-    \ setlocal tw=79 |
-    \ let &l:commentstring=">%s"
+    \ nmap <buffer> <c-m> :up<cr>:Make!<cr>|
+    \ setlocal tw=80 |
+    \ let &l:commentstring=">%s" |
+    \ let b:repl_with_file="open %<.pdf" |
+    \ nmap <silent> <leader>1 "mYjVpVr=k |
+    \ nmap <silent> <leader>2 "mYjVpVr-k |
+    \ vmap <silent> .> :s/^\([^$]\)/-   \1/<cr>:nohls<cr> |
+    \ vmap <silent> .< :s/^[- ]   //<cr>:nohls<cr>
 if ide
-    au Syntax markdown
-        \ syn clear mkdMath |
-        \ syn region mkdMath matchgroup=mkdDelimiter start="\\\@<!\$" end="\$" oneline |
-        \ syn region mkdMath matchgroup=mkdDelimiter start="\\\@<!\$\$" end="\$\$"
+    au FileType markdown
+        \ let b:delimitMate_quotes = "\" ' ` $" |
+        \ let b:surround_52 = "$$ \r $$" |
+        \ let b:surround_48 = "\\left(\r\\right)" |
+        \ nmap <silent> g\ ysiw}i\
+    " au Syntax markdown
+        " \ syn clear mkdMath |
+        " \ syn region mkdMath matchgroup=mkdDelimiter start="\\\@<!\$" end="\$" oneline |
+        " \ syn region mkdMath matchgroup=mkdDelimiter start="\\\@<!\$\$" end="\$\$"
     let g:vim_markdown_frontmatter = 1
+    let g:vim_markdown_math = 1
 endif
 
 
@@ -581,6 +645,9 @@ if has_key(ide_use, 'java')
 endif
 
 
+" Matlab {{{1
+au FileType matlab
+    \ setlocal commentstring=%%s
 " Man pages {{{1
 au FileType man
     \ setlocal ts=8 nolist nornu nonu cc= fdm=indent fdl=99 so=50

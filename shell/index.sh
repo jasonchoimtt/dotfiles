@@ -60,6 +60,8 @@ mn() {
     $1 --help 2>&1 | less -R
 }
 
+stty -ixon
+
 source "$DOTFILES_ROOT/shell/fzf.sh"
 
 # Horizontal rule
