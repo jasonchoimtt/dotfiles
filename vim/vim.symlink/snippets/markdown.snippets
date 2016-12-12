@@ -1,0 +1,62 @@
+snippet \fig
+	\\begin{figure}[h]
+	\\includegraphics[scale=0.5]{$1}
+	\\centering
+	\\caption{$2}
+	\\end{figure}
+
+snippet ---notes
+	---
+	title: $1
+	author: Jason Choi
+	geometry: a5paper,margin=1.27cm,bottom=1.92cm,footskip=0.65cm
+	---
+
+snippet ---assg
+	---
+	title: $1
+	author: Choi, Chi Kit (70996160)
+
+	date: `strftime("%B %d, %Y")`
+	geometry: letterpaper,left=3.81cm,right=3.81cm,top=2.54cm,bottom=2.54cm
+	---
+
+
+snippet =
+	`substitute(getline(getcurpos()[1]-1), '.', '=', 'g')`
+snippet -
+	`substitute(getline(getcurpos()[1]-1), '.', '-', 'g')`
+snippet #
+	$0
+	${1/./=/g}
+	
+
+snippet ##
+	$0
+	${1/./-/g}
+	
+
+snippet \b
+	\\begin{$1}
+	\\end{$1}
+
+snippet \cases
+	\\begin{cases}
+		$1 \\quad&\\textrm{if } $2 \\\\
+		$3 \\quad&\\textrm{otherwise}
+	\\end{cases}
+
+snippet $$
+	\$\$ $0 \$\$
+snippet \
+	\\textrm{$0}
+snippet \m
+	\\mathit{$0}
+snippet \bmat
+	\\begin{bmatrix}$0\\end{bmatrix}
+snippet (
+	\\left($0\\right
+snippet [
+	\\left[$0\\right
+snippet {
+	\\{$0\\

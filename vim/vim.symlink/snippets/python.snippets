@@ -1,0 +1,37 @@
+snippet main
+	def main():
+		$1
+
+
+	if __name__ == '__main__':
+		main()
+
+snippet bp
+	import pdb; pdb.set_trace()
+snippet typ
+	from typing import Dict, List, Optional, Tuple, cast
+
+snippet abc
+	from abc import ABCMeta, abstractmethod
+
+snippet abs
+	class ${1:Spam}(meta=ABCMeta):
+		${2:...}
+
+snippet abm
+	@abstractmethod
+	def ${1:foo}(self$2) -> ${3:None}: ...
+
+snippet class
+	class ${1:Spam}:
+		def __init__(self$2) -> None:
+			${3:...}
+
+snippet s.
+	self.$1 = $1
+snippet __i
+	def __init__(self$1) -> None:
+		${2:...}
+
+snippet logger
+	logger = logging.getLogger('`substitute(expand('%:r'), '/', '.', 'g')`')
