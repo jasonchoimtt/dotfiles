@@ -18,9 +18,10 @@ set bs=2
 let lwd=getcwd() " cwd at launch
 set ts=4 sw=4 et sts=4
 set wrap linebreak
+set hls
 try
     set breakindent
-catch E518
+catch /E518/
 endtry
 set colorcolumn=81,100
 " set modeline modelines=5
@@ -35,7 +36,7 @@ set splitright
 
 try
     set nofileignorecase
-catch E518
+catch /E518/
 endtry
 set wildignore+=.git,venv,__pycache__,node_modules,elm-stuff,build,gradle
 
@@ -51,8 +52,7 @@ vmap Q "qy:@q<cr>
 let mapleader=","
 
 " List characters {{{1
-set list
-set listchars=tab:·\ ,trail:-,extends:>,precedes:<,nbsp:+
+set list listchars=tab:·\ ,trail:-,extends:>,precedes:<,nbsp:+
 autocmd InsertEnter * setlocal nolist
 autocmd InsertLeave * setlocal list
 
@@ -62,7 +62,7 @@ autocmd InsertLeave * setlocal list
 function! MyFoldText()
     let line = getline(v:foldstart)
     let line = substitute(line, '\e[^m]*m', '', 'g')
-    if match(line, '^[ \t]*\(\/\*\|\/\/\)[*/\\]*[ \t]*$') == 0
+    if line =~ '^[ \t]*\(\/\*\|\/\/\)[*/\\]*[ \t]*$'
         let initial = substitute(line, '^\([ \t]\)*\(\/\*\|\/\/\)\(.*\)', '\1\2', '')
         let linenum = v:foldstart + 1
         while linenum < v:foldend
@@ -88,16 +88,24 @@ function! MyFoldText()
     let n = v:foldend - v:foldstart + 1
     let info = " " . n . " "
     let sub = sub . repeat(' ', 240)
-    let num_w = getwinvar(0, '&number') * getwinvar(0, '&numberwidth')
-    let fold_w = getwinvar(0, '&foldcolumn')
+    let num_w = (&number || &relativenumber) * &numberwidth
+    let fold_w = &foldcolumn
     let sub = strpart(sub, 0, winwidth(0) - strlen(info) - num_w - fold_w - 2)
     return sub . info
 endfunction
 set foldtext=MyFoldText()
 
+" Unimpaired-ish toggling bindings
 nmap [oF :setlocal fdm=syntax<cr>
 nmap [oM :setlocal fdm=marker<cr>zR
 nmap ]oF :setlocal fdm=manual<cr>
+if ide
+    nmap [oN :NeoCompleteEnable<cr>
+    nmap ]oN :NeoCompleteEnable<cr>
+endif
+nmap [C :set conceallevel=1<cr>
+nmap ]C :set conceallevel=0<cr>
+
 
 " Mouse motion {{{1
 nnoremap <ScrollWheelUp> 3<c-y>3k
@@ -118,33 +126,17 @@ au TabLeave * let g:lasttab = tabpagenr()
 nmap <silent> g` :exe "tabn ".g:lasttab<cr>
 
 " Terminal.app tab switching {{{1
-exec "nmap <silent> \e1 1gt"
-exec "nmap <silent> \e2 2gt"
-exec "nmap <silent> \e3 3gt"
-exec "nmap <silent> \e4 4gt"
-exec "nmap <silent> \e5 5gt"
-exec "nmap <silent> \e6 6gt"
-exec "nmap <silent> \e7 7gt"
-exec "nmap <silent> \e8 8gt"
-exec "nmap <silent> \e9 9gt"
+for i in [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    exec "nmap <silent> \e".i." ".i."gt"
+endfor
 
 " Searching {{{1
 set incsearch
 nmap <silent> <esc><esc> :nohls<cr>
-"\|call QuickfixsignsUpdate()<cr>
 set timeout timeoutlen=3000 ttimeoutlen=10
-" Quickly insert word under cursor
-cmap <c-x>w <c-r>=expand('<cword>')<cr>
-cmap <c-x><c-w> \<<c-r>=expand('<cword>')<cr>\>
 " Quickly replace word under cursor
-nmap <leader>* :%s/\<<c-r>=expand('<cword>')<cr>\>/
-nmap <leader>g* :%s/<c-r>=expand('<cword>')<cr>/
-" Search without hls quickly
-nmap <silent> g<space> :nohls<cr>
-nnoremap g? :setl nohls<cr>?
-nnoremap g/ :setl nohls<cr>/
-nnoremap / :let @/=''<cr>:setl hls<cr>/
-nnoremap ? :let @/=''<cr>:setl hls<cr>?
+nmap g: :%s/\<<c-r><c-w>\>/
+nmap z: :%s/<c-r><c-w>/
 
 " Centering with foldcolumn and numberwidth (gutter) {{{1
 nmap <silent> [, :let &fdc-=1<cr>
@@ -155,11 +147,6 @@ nmap <silent> [. :let &nuw-=1<cr>
 nmap <silent> ]. :let &nuw+=1<cr>
 nmap <silent> [> :let &nuw-=5<cr>
 nmap <silent> ]> :let &nuw+=5<cr>
-
-" Text wrapping {{{1
-nmap <silent> <leader>j gqip
-vmap <silent> <leader>j gq
-nmap <silent> <leader>J vipJ
 
 " Add trailing character {{{1
 nmap <silent> <leader>, m`A,<esc>``
@@ -205,32 +192,29 @@ function! CleverTab()
 endfunction
 " Keyword complete
 inoremap <silent> <tab> <c-r>=CleverTab()<cr>
+
 " Compilation {{{1
-nmap <silent> <f1> :up<cr>:make<cr>
-nmap <silent> <leader>w :up<cr>
-nmap <silent> <leader>M :up<cr>:make<cr>
-function! GetInterpreter()
-    return exists('b:interpreter') ? b:interpreter : 'make %< && ./%<'
-endfunction
-nmap <silent> <leader>r :up<cr>:exec '!'.GetInterpreter()<cr>
-if ide
-    nmap <silent> <leader>R :up<cr>:exec 'Dispatch '.GetInterpreter()<cr>
-endif
-nmap <silent> <leader>i :exec '!'.b:repl<cr>
-nmap <silent> <leader>I :exec '!'.b:repl_with_file<cr>
-nmap ZS :up<cr><c-z>
-" Requires 'stty -ixon' in bashrc
+let interpreter = 'make %< && ./%<'
+let repl = 'python'
+let repl_with_file = 'echo No REPL specified.'
+" These two require 'stty -ixon' in bashrc
 nmap <c-s> :w<cr>
 nmap <c-q> :q<cr>
-nmap <leader><c-s> :W<cr>
-nmap <leader><c-m> :TmuxSaveSwitchRerunWindow<cr>
+
+nmap ZS :up<cr><c-z>
+
+nmap g<c-s> :W<cr>
+nmap g<c-m> :TmuxSaveSwitchRerunWindow<cr>
+
+nmap <silent> <c-m> :up<cr>:make<cr>
+nmap <silent> <leader><c-r> :up<cr>:exec '!'.interpreter<cr>
+if ide
+    nmap <silent> z<c-r> :up<cr>:exec 'Dispatch '.interpreter<cr>
+endif
+nmap <silent> g<c-i> :exec '!'.repl<cr>
+nmap <silent> z<c-i> :exec '!'.repl_with_file<cr>
 
 command! -range=% ClangFormat exec 'normal m`'|exec '<line1>,<line2>!clang-format "--assume-filename=%:t" --style=file'|exec 'normal ``'
-" Screen capture {{{1
-function! DoScreenCapture()
-endfunction
-command! ScreenCapture call DoScreenCapture()
-
 " }}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -249,7 +233,6 @@ Plugin 'ctrlpvim/ctrlp.vim'
 
 Plugin 'tpope/vim-dispatch'
 
-" Plugin 'jeffkreeftmeijer/vim-numbertoggle'
 Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-commentary'
 Plugin 'tpope/vim-unimpaired'
@@ -312,11 +295,6 @@ filetype plugin indent on
 
 command! VInstall normal VY:@"<cr>:VundleInstall<cr>
 
-nmap [oN :NeoCompleteEnable<cr>
-nmap ]oN :NeoCompleteEnable<cr>
-nmap [C :set conceallevel=1<cr>
-nmap ]C :set conceallevel=0<cr>
-
 " Colorscheme {{{1
 try
     function! ApplyTheme()
@@ -341,7 +319,7 @@ try
     endfunction
     command! Theme call ApplyTheme()
     Theme
-catch E185
+catch /E185/
 endtry
 
 " snipMate {{{1
@@ -360,7 +338,6 @@ endif
 nmap <silent> <leader>t :NERDTreeToggle<cr>
 nmap <silent> <leader>T :NERDTreeFind<cr>
 nmap <silent> <leader>e :CtrlP<cr>
-nmap <silent> <c-f> :CtrlP<cr>
 nmap <silent> <leader>E :CtrlPBuffer<cr>
 nmap <leader>c :lcd %:p:h<cr>
 
@@ -376,6 +353,13 @@ if v:shell_error == 0
 endif
 
 " Other editing magic {{{1
+let g:SignatureMap = {
+    \ 'PurgeMarks'         :  "m<Space><Space>",
+    \ 'GotoNextLineAlpha'  :  "')",
+    \ 'GotoPrevLineAlpha'  :  "'(",
+    \ 'GotoNextSpotAlpha'  :  "`)",
+    \ 'GotoPrevSpotAlpha'  :  "`("
+    \}
 if ide
     " splitjoin.vim: gJ, gK
     let g:splitjoin_split_mapping = 'gK'
@@ -406,12 +390,9 @@ if ide
     omap R <Plug>Sneak_S
 
     " AnsiEsc.vim
-    nmap ,A :AnsiEsc<cr>
+    nmap [A :AnsiEsc<cr>
+    nmap ]A :AnsiEsc<cr>
 endif
-
-" exec "nmap <silent> \eO O<cr><c-o>k"
-" exec "nmap <silent> \eo o<cr>"
-
 
 " HTTP client {{{1
 if ide
@@ -442,7 +423,7 @@ command! -nargs=1 Spaces setlocal ts=<args> sw=<args> sts=<args>
 
 " Auto readonly {{{1
 function! ConfigReadOnly()
-    if match(expand('%'), '\<node_modules\>') != -1
+    if expand('%') =~ '\<node_modules\>'
         setlocal ro noma
     endif
 endfunction
@@ -450,10 +431,9 @@ autocmd BufRead * call ConfigReadOnly()
 
 " Switch file {{{1
 function! SuperSwitchFile()
-    let spec = matchstr(expand('%'), '\.spec\.[jt]sx\?$')
     let ext = matchstr(expand('%'), '\.[^.]\+$')
     if ext == '.ts' || ext == '.js' || ext == '.jsx'
-        if !empty(spec)
+        if expand('%') =~ '\.spec\.[jt]sx\?$'
             exec 'edit %:r:r'.ext
         else
             exec 'edit %:r.spec'.ext
@@ -497,10 +477,7 @@ let g:neocomplete#enable_ignore_case = 0
 if ide
     let g:syntastic_always_populate_loc_list = 1
     let g:syntastic_auto_loc_list = 2
-    " set rulerformat=%30(%l,%c%V%=%P\ \ %#Error#%{SyntasticStatuslineFlag()}%*%)
-    " let g:syntastic_stl_format=" %t "
     let g:syntastic_enable_highlighting = 0
-    "let g:syntastic_enable_signs = 0
 endif
 
 " gitgutter {{{1
@@ -509,11 +486,8 @@ nmap <silent> <Plug>TryFoldOpen @=(foldlevel('.')?'zO':'')<cr>
 nmap [c <Plug>GitGutterPrevHunk<Plug>TryFoldOpen
 nmap ]c <Plug>GitGutterNextHunk<Plug>TryFoldOpen
 
-" C .c/C++ .cpp {{{1
-let g:syntastic_cpp_compiler_options = '-Wall -std=c++11'
 " Python .py {{{1
 au FileType python
-    \ setlocal foldlevel=2|
     \ let b:interpreter="python3 %"|
     \ let b:repl_with_file="python3 -i %"|
     \ let b:repl="python3"
@@ -573,10 +547,6 @@ if has_key(ide_use, 'typescript')
 endif
 
 
-" Elm .elm {{{1
-au BufRead,BufNewFile *.elm set ft=haskell
-
-
 " Markdown .md {{{1
 au FileType markdown
     \ let &l:makeprg='mark -o "%:r.pdf" "%" && open "%:r.pdf"'|
@@ -586,10 +556,8 @@ au FileType markdown
     \ setlocal tw=80 |
     \ let &l:commentstring=">%s" |
     \ let b:repl_with_file="open %<.pdf" |
-    \ nmap <silent> <leader>1 "mYjVpVr=k |
-    \ nmap <silent> <leader>2 "mYjVpVr-k |
-    \ vmap <silent> .> :s/^\([^$]\)/-   \1/<cr>:nohls<cr> |
-    \ vmap <silent> .< :s/^[- ]   //<cr>:nohls<cr>
+    \ vmap <silent> <leader>> :s/^\([^$]\)/-   \1/<cr>:nohls<cr> |
+    \ vmap <silent> <leader>< :s/^[- ]   //<cr>:nohls<cr>
 if ide
     au FileType markdown
         \ let b:delimitMate_quotes = "\" ' ` $" |
@@ -621,14 +589,6 @@ if has_key(ide_use, 'rust')
 endif
 
 
-" Vim .vim {{{1
-au FileType vim setlocal foldmethod=marker foldlevel=0
-
-
-" YAML .yaml {{{1
-au FileType yaml setlocal ts=2 sw=2 sts=2
-
-
 " Ruby .rb {{{1
 au FileType ruby
     \ let b:interpreter="ruby %"|
@@ -636,6 +596,16 @@ au FileType ruby
     \ let b:repl="irb"
 
 
+" C .c/C++ .cpp {{{1
+if ide
+    let g:syntastic_cpp_compiler_options = '-Wall -std=c++11'
+endif
+" Vim .vim {{{1
+au FileType vim setlocal foldmethod=marker foldlevel=0
+" Elm .elm {{{1
+au BufRead,BufNewFile *.elm set ft=haskell
+" YAML .yaml {{{1
+au FileType yaml setlocal ts=2 sw=2 sts=2
 " Java .java {{{1
 if has_key(ide_use, 'java')
     au FileType java
@@ -643,9 +613,7 @@ if has_key(ide_use, 'java')
     au FileType java
         \ map <buffer> <leader>i :JCimportAdd<cr>
 endif
-
-
-" Matlab {{{1
+" Matlab .m {{{1
 au FileType matlab
     \ setlocal commentstring=%%s
 " Man pages {{{1
