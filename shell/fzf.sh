@@ -1,11 +1,11 @@
-if [ -n "$SSH_CLIENT" ]; then
+if [[ -z "$INTERACTIVE" ]] || [[ -n "$SSH_CLIENT" ]]; then
     return
 fi
 
 # Initialize fzf and related fuzzy finding, if available
 if [ -f ~/.fzf.$SHELL_TYPE ]; then
     source ~/.fzf.$SHELL_TYPE
-    if which ag > /dev/null; then
+    if which ag 2> /dev/null; then
         export FZF_DEFAULT_COMMAND='ag -g ""'
         export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
     fi

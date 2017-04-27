@@ -22,9 +22,6 @@ zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.cache/zsh
 compinit
 
-autoload -U tetris
-tetris 2> /dev/null
-
 # CD recent
 autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
 add-zsh-hook chpwd chpwd_recent_dirs

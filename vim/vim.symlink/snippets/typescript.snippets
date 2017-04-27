@@ -1,0 +1,21 @@
+snippet im*
+	import * as $1 from '$1';
+snippet Re
+	import * as React from 'react';
+
+
+	const styles = {
+		main: {}
+	};
+
+	export class ${1:Component} extends React.Component<{}, {}> {
+		render() {
+			return (
+				<div style={styles.main}>
+					${1:Component}
+				</div>
+			);
+		}
+	}
+snippet log
+	console.log(${1:'oops'});

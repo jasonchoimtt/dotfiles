@@ -14,9 +14,9 @@ syntax on
 set nonu rnu nuw=3
 set ruler
 set ai nosi ci
-set bs=2
+set bs=indent,eol,start
 let lwd=getcwd() " cwd at launch
-set ts=4 sw=4 et sts=4
+set ts=4 sw=4 et
 set wrap linebreak
 set hls
 try
@@ -43,13 +43,17 @@ set wildignore+=.git,venv,__pycache__,node_modules,elm-stuff,build,gradle
 set mouse=a
 set scrolloff=5
 
+set conceallevel=0
+
 cabbrev help tab help
 command! Dot tabe ~/.vimrc
+command! Ldot tabe __meta/.vimrc
 command! Q q
 " Run selected command
 vmap Q "qy:@q<cr>
 
 let mapleader=","
+nnoremap \ ,
 
 " List characters {{{1
 set list listchars=tab:·\ ,trail:-,extends:>,precedes:<,nbsp:+
@@ -105,6 +109,8 @@ if ide
 endif
 nmap [C :set conceallevel=1<cr>
 nmap ]C :set conceallevel=0<cr>
+nmap [ot :TableModeEnable<cr>
+nmap ]ot :TableModeDisable<cr>
 
 
 " Mouse motion {{{1
@@ -133,6 +139,7 @@ endfor
 " Searching {{{1
 set incsearch
 nmap <silent> <esc><esc> :nohls<cr>
+nmap <silent> '; :nohls<cr>
 set timeout timeoutlen=3000 ttimeoutlen=10
 " Quickly replace word under cursor
 nmap g: :%s/\<<c-r><c-w>\>/
@@ -200,13 +207,14 @@ let repl_with_file = 'echo No REPL specified.'
 " These two require 'stty -ixon' in bashrc
 nmap <c-s> :w<cr>
 nmap <c-q> :q<cr>
+nmap g<c-q> :bd<cr>
 
 nmap ZS :up<cr><c-z>
 
 nmap g<c-s> :W<cr>
-nmap g<c-m> :TmuxSaveSwitchRerunWindow<cr>
+nmap gM :TmuxSaveSwitchRerunWindow<cr>
 
-nmap <silent> <c-m> :up<cr>:make<cr>
+nmap <silent> <leader>M :up<cr>:make<cr>
 nmap <silent> <leader><c-r> :up<cr>:exec '!'.interpreter<cr>
 if ide
     nmap <silent> z<c-r> :up<cr>:exec 'Dispatch '.interpreter<cr>
@@ -215,7 +223,16 @@ nmap <silent> g<c-i> :exec '!'.repl<cr>
 nmap <silent> z<c-i> :exec '!'.repl_with_file<cr>
 
 command! -range=% ClangFormat exec 'normal m`'|exec '<line1>,<line2>!clang-format "--assume-filename=%:t" --style=file'|exec 'normal ``'
+
+nmap <f1> <nop>
+imap <f1> <nop>
 " }}}
+" Editing {{{1
+imap <c-j> <c-k>*
+imap <c-j>s <c-k>s*
+imap <c-j>f \phi
+imap <c-j>, ≤
+imap <c-j>. ≥
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Plugin supported stuff
@@ -242,7 +259,7 @@ Plugin 'Valloric/ListToggle'
 Plugin 'kshenoy/vim-signature'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'tpope/vim-fugitive'
-Plugin 'justinmk/vim-sneak'
+Plugin 'dhruvasagar/vim-table-mode'
 
 if ide
     Plugin 'embear/vim-localvimrc'
@@ -276,8 +293,12 @@ if ide
         Plugin 'Shougo/vimproc' " Required for tsuquyomi
         Plugin 'Quramy/tsuquyomi' " TypeScript omnicomplete
     endif
-    Plugin 'plasticboy/vim-markdown'
+    if has_key(ide_use, 'elm')
+        Plugin 'ElmCast/elm-vim'
+    endif
+    " Plugin 'plasticboy/vim-markdown'
     Plugin 'digitaltoad/vim-pug'
+    Plugin 'cespare/vim-toml'
     if has_key(ide_use, 'rust')
         Plugin 'rust-lang/rust.vim'
     endif
@@ -286,6 +307,9 @@ if ide
     endif
     if has_key(ide_use, 'java')
         Plugin 'artur-shaik/vim-javacomplete2'
+    endif
+    if has_key(ide_use, 'glsl')
+        Plugin 'tikhomirov/vim-glsl'
     endif
 endif
 
@@ -332,6 +356,7 @@ if ide
     imap <c-x><c-h> <Plug>snipMateShow
     smap <c-h> <Plug>snipMateNextOrTrigger
     xmap <c-h> <Plug>snipMateVisual
+    nmap [oS :SnipMateOpenSnippetFiles<cr><cr>
 endif
 
 " File navigation {{{1
@@ -345,6 +370,12 @@ let NERDTreeShowBookmarks = 1
 
 let g:ctrlp_map = ''
 let g:ctrlp_working_path_mode = ''
+let g:ctrlp_match_window = 'bottom,order:btt,min:15,max:15,results:15'
+let g:ctrlp_prompt_mappings = {
+\ 'PrtSelectMove("j")':   ['<c-j>', '<down>', '<c-n>'],
+\ 'PrtSelectMove("k")':   ['<c-k>', '<up>', '<c-p>'],
+\ 'PrtClearCache()':      ['<F5>', '<c-@>'],
+\ }
 call system('which ag')
 if v:shell_error == 0
     let g:ctrlp_user_command = 'ag -g "" %s'
@@ -365,7 +396,7 @@ if ide
     let g:splitjoin_split_mapping = 'gK'
 
     " closetag.vim
-    let g:closetag_filenames = "*.html,*.hbs,*.jsx,*.xml"
+    let g:closetag_filenames = "*.html,*.hbs,*.jsx,*.xml,*.tsx"
 
     " delimitMate
     let delimitMate_expand_cr = 1
@@ -390,8 +421,8 @@ if ide
     omap R <Plug>Sneak_S
 
     " AnsiEsc.vim
-    nmap [A :AnsiEsc<cr>
-    nmap ]A :AnsiEsc<cr>
+    nmap [E :AnsiEsc<cr>
+    nmap ]E :AnsiEsc<cr>
 endif
 
 " HTTP client {{{1
@@ -478,7 +509,13 @@ if ide
     let g:syntastic_always_populate_loc_list = 1
     let g:syntastic_auto_loc_list = 2
     let g:syntastic_enable_highlighting = 0
+    nmap [oC :SyntasticToggleMode<cr>
+    nmap ]oC :SyntasticToggleMode<cr>
 endif
+
+" fugitive {{{1
+map <silent> gz :Gst<cr>9G
+map <silent> gy <c-w>k-dv
 
 " gitgutter {{{1
 let g:gitgutter_sign_column_always = 1
@@ -505,7 +542,7 @@ if has_key(ide_use, 'python')
 
     " Consistent with TypeScript plugin
     let g:jedi#goto_command = '<c-]>'
-    let g:jedi#rename_command = '<c-^>'
+    let g:jedi#rename_command = ',^'
 
     let g:syntastic_python_checkers = ["pyflakes"]
 
@@ -548,29 +585,63 @@ endif
 
 
 " Markdown .md {{{1
-au FileType markdown
-    \ let &l:makeprg='mark -o "%:r.pdf" "%" && open "%:r.pdf"'|
-    \ setl matchpairs-=<:>|
-    \ nmap <buffer> <f1> :up<cr>:Make!<cr>|
-    \ nmap <buffer> <c-m> :up<cr>:Make!<cr>|
-    \ setlocal tw=80 |
-    \ let &l:commentstring=">%s" |
-    \ let b:repl_with_file="open %<.pdf" |
-    \ vmap <silent> <leader>> :s/^\([^$]\)/-   \1/<cr>:nohls<cr> |
-    \ vmap <silent> <leader>< :s/^[- ]   //<cr>:nohls<cr>
-if ide
-    au FileType markdown
-        \ let b:delimitMate_quotes = "\" ' ` $" |
-        \ let b:surround_52 = "$$ \r $$" |
-        \ let b:surround_48 = "\\left(\r\\right)" |
-        \ nmap <silent> g\ ysiw}i\
-    " au Syntax markdown
-        " \ syn clear mkdMath |
-        " \ syn region mkdMath matchgroup=mkdDelimiter start="\\\@<!\$" end="\$" oneline |
-        " \ syn region mkdMath matchgroup=mkdDelimiter start="\\\@<!\$\$" end="\$\$"
-    let g:vim_markdown_frontmatter = 1
-    let g:vim_markdown_math = 1
-endif
+let g:tex_superscripts= "[0-9a-zA-W.,:;+-<>/()=]"
+let g:tex_subscripts= "0-9aeijoruvx+-/()."
+function! MarkdownFt()
+    let &l:makeprg='mark -o "%:r.pdf" "%" && open -a /Applications/Preview.app "%:r.pdf"'
+    setl matchpairs-=<:>
+    nmap <buffer> <leader>M :up<cr>:Make!<cr>
+    nmap <buffer> gX <Plug>Markdown_EditUrlUnderCursor
+    " math display to math align
+    nmap <buffer> <silent> <leader>& $Bi\\<cr><esc>k0ea&<esc>0f=i&<esc>o<tab>
+    " math align add line break
+    nmap <buffer> <silent> <leader>\ :s/\.\?$/ \\\\<cr>:nohls<cr>o
+    " math align to math display
+    nmap <buffer> <silent> <leader><bs> :s/&\\| \\\\//g<cr>:nohls<cr>
+    " preview
+    nmap <buffer> <silent> <space> :call system('pandown '.expand('%'))<cr>
+    nmap <buffer> <silent> g<space> :up<cr>:call system('pandown '.expand('%'))<cr>
+    " add bullet point
+    vmap <buffer> <silent> <leader>> :s/^\([^$]\)/-   \1/<cr>:nohls<cr>
+    " remove bulet point
+    vmap <buffer> <silent> <leader>< :s/^[- ]   //<cr>:nohls<cr>
+    " wrap with \sth{}
+    nmap <buffer> <silent> g\ ysiw}i\
+    " delete \left \right
+    nmap <buffer> <silent> ds\ /\\right<cr>dft?\\left<cr>dft:nohls<cr>
+    " add bullet in insert mode
+    imap <buffer> <c-_> <bs><bs><bs><bs>-<space><space><space>
+    imap <buffer> <c-\> <bs><bs><bs><bs><space><space><space><space>
+    setl tw=80
+    let &l:commentstring=">%s"
+    let b:repl_with_file="open %<.pdf"
+    if g:ide
+        let b:delimitMate_quotes = "\" ' ` $"
+        let b:surround_{char2nr('4')} = "$$ \r $$"
+        let b:surround_{char2nr('0')} = "\\left(\r\\right)"
+        let b:surround_{char2nr('9')} = "\\left[\r\\right]"
+        let b:surround_{char2nr('8')} = "**\r**"
+        let b:surround_{char2nr('1')} = "‖\r‖"
+        let b:surround_{char2nr('!')} = "\\left|\r\\right|"
+    endif
+endfunction
+au FileType markdown call MarkdownFt()
+
+" Builtin markdown runtime
+let g:markdown_syntax_conceal = 0
+let g:markdown_fenced_languages = ['{\?\.dot.*=dot', '{\?\.python.*=python',  '{\?\.matlab.*=matlab',  '{\?\.\(ba\)\?sh.*=sh']
+function MarkdownSyn()
+    syn clear markdownItalic markdownError
+    unlet b:current_syntax
+    syn include @tex syntax/tex.vim
+    let b:current_syntax='markdown'
+    syn region markdownMath start="\\\@<!\$" end="\$" contains=@tex keepend
+    syn region markdownMath start="\\\@<!\$\$" end="\$\$" contains=@tex keepend
+    syn clear markdownCodeBlock
+    syn sync maxlines=50
+    set conceallevel=0
+endfunction
+au Syntax markdown call MarkdownSyn()
 
 
 " HTML and templating {{{1
@@ -598,12 +669,17 @@ au FileType ruby
 
 " C .c/C++ .cpp {{{1
 if ide
+    let g:syntastic_cpp_compiler = 'g++-6'
     let g:syntastic_cpp_compiler_options = '-Wall -std=c++11'
 endif
 " Vim .vim {{{1
 au FileType vim setlocal foldmethod=marker foldlevel=0
 " Elm .elm {{{1
-au BufRead,BufNewFile *.elm set ft=haskell
+if has_key(ide_use, 'elm')
+    let g:elm_setup_keybindings = 0
+    let g:elm_syntastic_show_warnings = 1
+    let g:syntastic_elm_checkers = ['elm_make']
+end
 " YAML .yaml {{{1
 au FileType yaml setlocal ts=2 sw=2 sts=2
 " Java .java {{{1

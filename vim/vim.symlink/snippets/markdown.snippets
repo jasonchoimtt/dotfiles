@@ -15,7 +15,7 @@ snippet ---notes
 snippet ---assg
 	---
 	title: $1
-	author: Choi, Chi Kit (70996160)
+	author: Choi, Chi Kit (Jason) (70996160)
 
 	date: `strftime("%B %d, %Y")`
 	geometry: letterpaper,left=3.81cm,right=3.81cm,top=2.54cm,bottom=2.54cm
@@ -40,18 +40,31 @@ snippet \b
 	\\begin{$1}
 	\\end{$1}
 
+snippet \casesif
+	\\begin{cases}
+		$1 &\\textrm{if } $2 \\\\
+		$3 &\\textrm{otherwise}
+	\\end{cases}
+
 snippet \cases
 	\\begin{cases}
-		$1 \\quad&\\textrm{if } $2 \\\\
-		$3 \\quad&\\textrm{otherwise}
+		$1 & $2 \\\\
+		$3 & $4
 	\\end{cases}
 
 snippet $$
 	\$\$ $0 \$\$
+snippet $$&
+	\$\$& $0
+	\$\$
 snippet \
 	\\textrm{$0}
 snippet \m
 	\\mathit{$0}
+snippet /
+	\\frac{$1}{$2}$0
+snippet 1/
+	\\frac1{$1}$0
 snippet \bmat
 	\\begin{bmatrix}$0\\end{bmatrix}
 snippet (
@@ -60,3 +73,57 @@ snippet [
 	\\left[$0\\right
 snippet {
 	\\{$0\\
+snippet \ceil
+	⌈$0⌉
+snippet ⌈
+	\left⌈\right
+snippet \floor
+	⌊$0⌋
+snippet ⌊
+	\left⌊\right
+snippet \sum
+	\\sum_{${1:i}=1}^${0:n}
+snippet \sum0
+	\\sum_{${1:i}=0}^${0:n}
+snippet |
+	‖$1‖$0
+snippet |1
+	‖$1‖_1$0
+snippet |2
+	‖$1‖_2$0
+snippet |0
+	‖$1‖_∞$0
+snippet ||
+	\\left\\|$1\\right\\|$0
+snippet \new\R
+	\\newcommand{\\R}{\\mathbb{R}}
+snippet \new\I
+	\\newcommand{\\I}{\\mathbb{I}}
+snippet \new\D
+	\\newcommand{\\D}{\\operatorname{d}}
+	\\newcommand{\\id}{\\,\\D}
+	\\newcommand{\\dd}[3][{}]{\\frac{\\D^{#1} #2}{\\D #3}}
+	\\newcommand{\\dP}[3][{}]{\\frac{\\partial^{#1} #2}{\\partial #3}}
+	<!-- If latex --> \\iftrue \\renewcommand{\\D}{\\operatorname{d}\\!} \\fi
+snippet \new\E
+	\\newcommand{\\E}{\\mathbb{E}}
+snippet ^1
+	^{-1}
+snippet #in
+	![#include]($1){.$2 ${3:listing=yes}}
+snippet **
+	**$1**$0
+
+snippet \dot
+	\`\`\`{.dot exec=plot}
+	graph G {
+		$1
+	}
+	\`\`\`
+
+snippet \ddot
+	\`\`\`{.dot exec=plot}
+	digraph G {
+		$1
+	}
+	\`\`\`

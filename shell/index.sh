@@ -13,53 +13,75 @@ _color_seq() {
     fi
 }
 
-[ -z "$PROMPT_COLOR" ] && PROMPT_COLOR=4
+[[ -z "$PROMPT_COLOR" ]] && PROMPT_COLOR=4
 
 # Variables
-export PATH=~/local/bin:~/.dotfiles/bin:$PATH
+export PATH=~/local/bin:~/.dotfiles/bin:$PATH:~/.cabal/bin
 
-export CLICOLOR=true
 export LC_ALL="en_US.utf-8"
-export EDITOR=vim
-export MANPAGER="bash -c \"vim -n -c 'setl ft=man ro nomod noma' -c 'nmap q ZQ' -c 'sign unplace *' </dev/tty <(col -b)\""
-export LESS="-R"
+
+case $- in
+    *i*) INTERACTIVE=1;;
+esac
 
 
-# Aliases
-alias l='ls'
-[ "$(uname -s)" != "Darwin" ] && alias ls='ls --color=auto'
-alias la='ls -al'
-alias rm='rm -i'
-alias mv='mv -i'
+if [[ -n "$INTERACTIVE" ]]; then
+    export CLICOLOR=true
+    export EDITOR=vim
+    export MANPAGER="bash -c \"vim -n -c 'setl ft=man ro nomod noma' -c 'nmap q ZQ' -c 'sign unplace *' </dev/tty <(col -b)\""
+    export LESS="-R"
 
-alias vimopen='vim -c CtrlP'
+    # Aliases
+    alias l='ls'
+    [ "$(uname -s)" != "Darwin" ] && alias ls='ls --color=auto'
+    alias la='ls -al'
+    alias rm='rm -i'
+    alias mv='mv -i'
 
-if [ $SHELL_TYPE '==' zsh ]; then
-    _vimopen() {
-        BUFFER="vimopen"
-        zle accept-line
+    alias g='git'
+    alias vgit='vim . -c Gstatus'
+
+    mn() { $1 --help 2>&1 | less -R; }
+
+    mkdcd() { mkdir "$1" && cd "$1" }
+
+    if which ag 2> /dev/null; then
+        alias \?='ag --pager "less"'
+    fi
+
+    alias vimopen='vim -c CtrlP'
+    if [ $SHELL_TYPE '==' zsh ]; then
+        _vimopen() {
+            BUFFER="vimopen"
+            zle accept-line
+        }
+        zle -N _vimopen
+        bindkey '\Cf' _vimopen
+    else
+        bind -x '"\C-f": "vimopen"'
+    fi
+
+    # Temporary environmental variable helpers
+    doenv_docker() {
+        if which docker-machine 2> /dev/null; then
+            local env_str
+            if env_str=$(docker-machine env default 2> /dev/null); then
+                eval $env_str
+            fi
+        fi
     }
-    zle -N _vimopen
-    bindkey '\Cf' _vimopen
-else
-    bind -x '"\C-f": "vimopen"'
+
+    doenv_python() {
+        [ -f venv/bin/activate ] && source venv/bin/activate
+    }
+
+    doenv() {
+        doenv_docker
+        doenv_python
+    }
 fi
 
-alias g='git'
-alias vgit='vim . -c Gstatus'
-
-if which ag > /dev/null; then
-    alias \?='ag --pager "less"'
-fi
-
-if [ -n "$TMUX" ]; then
-    alias s='tmux split-window'
-fi
-
-mn() {
-    $1 --help 2>&1 | less -R
-}
-
+# Allow Ctrl-S, Ctrl-Q to be used in vim
 stty -ixon
 
 source "$DOTFILES_ROOT/shell/fzf.sh"
@@ -71,30 +93,11 @@ hr() {
     _color_seq $HR_COLOR "$(printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' '▔')"
 }
 
-# Temporary environmental variable helpers
-doenv_docker() {
-    if which docker-machine > /dev/null; then
-        local env_str
-        if env_str=$(docker-machine env default 2> /dev/null); then
-            eval $env_str
-        fi
-    fi
-}
-
-doenv_python() {
-    [ -f venv/bin/activate ] && source venv/bin/activate
-}
-
-doenv() {
-    doenv_docker
-    doenv_python
-}
-
 
 # Local shell
-[ -f ~/.localrc ] && source ~/.localrc
+[[ -f ~/.localrc ]] && source ~/.localrc
 
-if [ -z "$SSH_CLIENT" ]; then
+if [[ -n "$INTERACTIVE" ]] && [[ -z "$SSH_CLIENT" ]]; then
     printf "$(_color_seq 244)You are at: $PWD @ $(hostname -f)$(_color_seq)\n"
 fi
 # vim:ft=zsh:

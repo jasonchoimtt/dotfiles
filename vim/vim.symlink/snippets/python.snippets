@@ -35,3 +35,13 @@ snippet __i
 
 snippet logger
 	logger = logging.getLogger('`substitute(expand('%:r'), '/', '.', 'g')`')
+snippet :
+	'$1': $1,
+snippet bench_time
+	from contextlib import contextmanager
+	@contextmanager
+	def bench_time(name='Operation'):
+		start = time.time()
+		yield
+		end = time.time()
+		print('{} took {:.2f} seconds'.format(name, end - start))
