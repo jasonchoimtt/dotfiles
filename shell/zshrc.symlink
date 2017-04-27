@@ -45,7 +45,7 @@ prompt_color() {
 prompt_color $PROMPT_COLOR
 
 # Put here since virtualenv will change PS1
-which doenv > /dev/null && doenv
+which doenv > /dev/null 2>&1 && doenv
 
 # Job list title
 case $TERM in

@@ -33,7 +33,7 @@ if [[ -n "$INTERACTIVE" ]]; then
 
     # Aliases
     alias l='ls'
-    [ "$(uname -s)" != "Darwin" ] && alias ls='ls --color=auto'
+    [[ "$(uname -s)" != "Darwin" ]] && alias ls='ls --color=auto'
     alias la='ls -al'
     alias rm='rm -i'
     alias mv='mv -i'
@@ -43,14 +43,14 @@ if [[ -n "$INTERACTIVE" ]]; then
 
     mn() { $1 --help 2>&1 | less -R; }
 
-    mkdcd() { mkdir "$1" && cd "$1" }
+    mkdcd() { mkdir "$1" && cd "$1"; }
 
-    if which ag 2> /dev/null; then
+    if which ag > /dev/null 2>&1; then
         alias \?='ag --pager "less"'
     fi
 
     alias vimopen='vim -c CtrlP'
-    if [ $SHELL_TYPE '==' zsh ]; then
+    if [[ $SHELL_TYPE == zsh ]]; then
         _vimopen() {
             BUFFER="vimopen"
             zle accept-line
@@ -63,7 +63,7 @@ if [[ -n "$INTERACTIVE" ]]; then
 
     # Temporary environmental variable helpers
     doenv_docker() {
-        if which docker-machine 2> /dev/null; then
+        if which docker-machine > /dev/null 2>&1; then
             local env_str
             if env_str=$(docker-machine env default 2> /dev/null); then
                 eval $env_str
@@ -72,7 +72,7 @@ if [[ -n "$INTERACTIVE" ]]; then
     }
 
     doenv_python() {
-        [ -f venv/bin/activate ] && source venv/bin/activate
+        [[ -f venv/bin/activate ]] && source venv/bin/activate
     }
 
     doenv() {
