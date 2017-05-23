@@ -37,6 +37,7 @@ if [[ -n "$INTERACTIVE" ]]; then
     alias la='ls -al'
     alias rm='rm -i'
     alias mv='mv -i'
+    alias cp='cp -i'
 
     alias g='git'
     alias vgit='vim . -c Gstatus'
