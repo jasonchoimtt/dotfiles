@@ -412,14 +412,6 @@ if ide
     nmap <silent> <leader>( ysiW)i
     nmap <silent> <leader>[ ysiW]i
 
-    " sneak
-    nmap r <Plug>Sneak_s
-    nmap R <Plug>Sneak_S
-    xmap r <Plug>Sneak_s
-    xmap R <Plug>Sneak_S
-    omap r <Plug>Sneak_s
-    omap R <Plug>Sneak_S
-
     " AnsiEsc.vim
     nmap [E :AnsiEsc<cr>
     nmap ]E :AnsiEsc<cr>
