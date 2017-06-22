@@ -20,7 +20,7 @@ fi
 autoload -U compinit
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.cache/zsh
-compinit
+compinit -u
 
 # CD recent
 autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
