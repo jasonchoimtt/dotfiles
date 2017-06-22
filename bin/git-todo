@@ -1,0 +1,6 @@
+#!/bin/bash
+root=$(git rev-parse --git-dir)/..
+
+cd "$root"
+
+cat $(git ls-tree --full-tree --full-name --name-only -r HEAD) | grep -oE '(FIXME|TODO).*$'

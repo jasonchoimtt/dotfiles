@@ -1,0 +1,7 @@
+#!/bin/sh
+treeish=$1
+
+if [ -z "$treeish" ]; then
+    treeish=HEAD
+fi
+git diff -w --ignore-submodules -G"FIXME|TODO" "$treeish" | grep '^+' | grep -oE '(FIXME|TODO).*$'
