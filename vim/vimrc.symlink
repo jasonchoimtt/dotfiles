@@ -9,6 +9,10 @@ if filereadable(expand('~/.vimrc_local'))
     source ~/.vimrc_local
 endif
 
+map <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
+            \ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
+            \ . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
+
 " Basic config {{{1
 syntax on
 set nonu rnu nuw=3
@@ -202,7 +206,7 @@ inoremap <silent> <tab> <c-r>=CleverTab()<cr>
 
 " Compilation {{{1
 let interpreter = 'make %< && ./%<'
-let repl = 'python'
+let repl = 'python3'
 let repl_with_file = 'echo No REPL specified.'
 " These two require 'stty -ixon' in bashrc
 nmap <c-s> :w<cr>
@@ -284,6 +288,7 @@ if ide
         Plugin 'pangloss/vim-javascript'
         Plugin 'ternjs/tern_for_vim'
         Plugin 'Quramy/vim-js-pretty-template'
+        Plugin 'jparise/vim-graphql'
     endif
     if has_key(ide_use, 'coffeescript')
         Plugin 'kchmck/vim-coffee-script'
@@ -364,7 +369,14 @@ nmap <silent> <leader>t :NERDTreeToggle<cr>
 nmap <silent> <leader>T :NERDTreeFind<cr>
 nmap <silent> <leader>e :CtrlP<cr>
 nmap <silent> <leader>E :CtrlPBuffer<cr>
+nmap <silent> <leader>3 :CtrlP %:h<cr>
 nmap <leader>c :lcd %:p:h<cr>
+
+nmap <silent> <leader>f :CtrlPTag<cr>
+nmap <silent> <leader>F :CtrlPBufTag<cr>
+nmap <silent> <c-f>l :CtrlPLine<cr>
+nmap <silent> <c-f>u :CtrlPUndo<cr>
+
 
 let NERDTreeShowBookmarks = 1
 
@@ -566,7 +578,6 @@ endif
 " TypeScript .ts {{{1
 if has_key(ide_use, 'typescript')
     let g:typescript_compiler_options='--sourcemap --module commonjs'
-    let g:typescript_indent_disable = 1
     let g:syntastic_typescript_checkers = ['tsuquyomi']
 
     " Workaround for splitjoin somehow breaking for typescript
@@ -711,4 +722,10 @@ au FileType man
 " endfunction
 " command! -nargs=? Man call Man(<q-args>)
 " nmap <silent> K :Man<cr>
-"
+
+" Help {{{1
+function! HelpFt()
+    setl buflisted
+    nmap <silent><buffer>   <cr> <c-]>
+endfunction
+au FileType help call HelpFt()
