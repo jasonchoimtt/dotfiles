@@ -499,13 +499,18 @@ function! SuperSwitchFile()
         endtry
     endif
 endfunction
-function! SwitchFile(ext)
+function! SwitchFile(ext, command)
     exec 'edit %:r.'.a:ext
 endfunction
 map <silent> <leader>s :call SuperSwitchFile()<cr>
-map <silent> <leader>ah :call SwitchFile('html')<cr>
-map <silent> <leader>ac :call SwitchFile('css')<cr>
-map <silent> <leader>as :call SwitchFile('scss')<cr>
+map <silent> <leader>at :e %:r.ts<cr>
+map <silent> <leader>ah :e %:r.html<cr>
+map <silent> <leader>ac :e %:r.css<cr>
+map <silent> <leader>as :e %:r.scss<cr>
+map <silent> <c-w><leader>at :new %:r.ts<cr>
+map <silent> <c-w><leader>ah :new %:r.html<cr>
+map <silent> <c-w><leader>ac :new %:r.css<cr>
+map <silent> <c-w><leader>as :new %:r.scss<cr>
 
 " neocomplete
 let g:neocomplete#enable_ignore_case = 0
@@ -585,7 +590,8 @@ if has_key(ide_use, 'typescript')
     " Workaround for splitjoin somehow breaking for typescript
     au FileType typescript
         \ unlet b:splitjoin_split_callbacks b:splitjoin_join_callbacks|
-        \ source ~/.vim/bundle/splitjoin.vim/ftplugin/typescript/splitjoin.vim
+        \ source ~/.vim/bundle/splitjoin.vim/ftplugin/typescript/splitjoin.vim|
+        \ nmap <leader>i :TsuImport<cr>
 endif
 
 
