@@ -2,10 +2,20 @@ if-shell "[ -n \"$SHELL\" ]" "set-option -g default-shell \"$SHELL\""
 
 # vim hotkeys
 setw -g mode-keys vi
-unbind-key -T copy-mode-vi v
-bind-key -T copy-mode-vi v send -X begin-selection
-bind-key -T copy-mode-vi y send -X copy-selection
-if-shell "which reattach-to-user-namespace" "bind-key -T copy-mode-vi y send -X copy-pipe \"reattach-to-user-namespace pbcopy\""
+if-shell "(( `echo \"$(tmux -V | cut -d ' ' -f 2) < 2.4\" | bc -l` ))" "\
+    unbind-key -t vi-copy v;\
+    bind-key -t vi-copy v begin-selection;\
+    bind-key -t vi-copy C-v rectangle-toggle;\
+    bind-key -t vi-copy y copy-pipe \"xclip -sel clip\";\
+    "
+
+if-shell "(( `echo \"$(tmux -V | cut -d ' ' -f 2) >= 2.4\" | bc -l` ))" "\
+    unbind-key -T copy-mode-vi v;\
+    bind-key -T copy-mode-vi v send -X begin-selection;\
+    bind-key -T copy-mode-vi y send -X copy-selection;\
+    "
+if-shell "(( `echo \"$(tmux -V | cut -d ' ' -f 2) >= 2.4\" | bc -l` )) && which reattach-to-user-namespace" "\
+    bind-key -T copy-mode-vi y send -X copy-pipe \"reattach-to-user-namespace pbcopy\""
 
 # Mouse
 set -g mouse on
@@ -37,6 +47,12 @@ bind-key c new-window -c "#{pane_current_path}"
 bind-key c new-window -c "#{pane_current_path}"
 bind-key '"' split-window -c "#{pane_current_path}"
 bind-key % split-window -h -c "#{pane_current_path}"
+
+bind-key j select-pane -D
+bind-key k select-pane -U
+bind-key h select-pane -L
+unbind-key l
+bind-key l select-pane -R
 
 unbind-key ,
 bind-key , setw allow-rename off \; command-prompt -I "" "rename-window '%%'"

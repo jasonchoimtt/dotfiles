@@ -52,14 +52,14 @@ case $TERM in
     screen*)
         precmd() {
             local mark=◦
-            [ $#jobtexts != 0 ] && mark=⊕
+            [[ $#jobtexts != 0 ]] && mark=⊕
             printf "\ek$mark${jobtexts/ */}\e\\"
         }
         preexec() {
             local mark=
             [ $#jobtexts != 0 ] && mark=˖
             local job=${1/ */}
-            if [ job '==' fg ]; then
+            if [[ job == fg ]]; then
                 job=${jobtexts[%%]/ */}
             fi
             printf "\ek$job$mark${jobtexts/ */}\e\\"
@@ -85,7 +85,7 @@ fg_vim() {
 zle -N fg_vim
 bindkey '\Cz' fg_vim
 
-if [ -n "$TMUX" ]; then
+if [[ -n "$TMUX" ]]; then
     xvimopen() {
         if jobs %vim 2>/dev/null; then
             tmux send-keys C-z C-f
@@ -97,8 +97,10 @@ fi
 
 # Syntax highlighting
 # Must be at the bottom
-if [ -n "$BREW_PREFIX" ] && [ -f $BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+if [[ -n "$BREW_PREFIX" ]] && [[ -f $BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
     source $BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+elif [[ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
 true # Avoid error exit status
