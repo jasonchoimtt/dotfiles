@@ -390,7 +390,9 @@ let g:ctrlp_prompt_mappings = {
 \ }
 call system('which ag')
 if v:shell_error == 0
-    let g:ctrlp_user_command = 'ag -g "" %s'
+    " For some reason using %s instead of . will make ag not respect .gitignore
+    let g:ctrlp_user_command = 'true %s && ag -g "" .'
+    let g:ctrlp_use_caching = 0
     set grepprg=ag\ --vimgrep\ $*
     set grepformat=%f:%l:%c:%m
 endif
