@@ -107,14 +107,8 @@ set foldtext=MyFoldText()
 nmap [oF :setlocal fdm=syntax<cr>
 nmap [oM :setlocal fdm=marker<cr>zR
 nmap ]oF :setlocal fdm=manual<cr>
-if ide
-    nmap [oN :NeoCompleteEnable<cr>
-    nmap ]oN :NeoCompleteEnable<cr>
-endif
 nmap [C :set conceallevel=1<cr>
 nmap ]C :set conceallevel=0<cr>
-nmap [ot :TableModeEnable<cr>
-nmap ]ot :TableModeDisable<cr>
 
 
 " Mouse motion {{{1
@@ -205,9 +199,13 @@ endfunction
 inoremap <silent> <tab> <c-r>=CleverTab()<cr>
 
 " Compilation {{{1
-let interpreter = 'make %< && ./%<'
-let repl = 'python3'
-let repl_with_file = 'echo No REPL specified.'
+function! InitCompilation()
+    let b:interpreter = 'make %< && ./%<'
+    call system('which ipython3')
+    let b:repl = v:shell_error == 0 ? 'ipython3' : 'python3'
+    let b:repl_with_file = 'echo No REPL specified.'
+endfunction
+au BufEnter,BufRead * call InitCompilation()
 " These two require 'stty -ixon' in bashrc
 nmap <c-s> :w<cr>
 nmap <c-q> :q<cr>
@@ -218,13 +216,11 @@ nmap ZS :up<cr><c-z>
 nmap g<c-s> :W<cr>
 nmap gM :TmuxSaveSwitchRerunWindow<cr>
 
-nmap <silent> <leader>M :up<cr>:make<cr>
-nmap <silent> <leader><c-r> :up<cr>:exec '!'.interpreter<cr>
-if ide
-    nmap <silent> z<c-r> :up<cr>:exec 'Dispatch '.interpreter<cr>
-endif
-nmap <silent> g<c-i> :exec '!'.repl<cr>
-nmap <silent> z<c-i> :exec '!'.repl_with_file<cr>
+nmap <silent> <leader>m :up<cr>:make<cr>
+nmap <silent> <leader>M :up<cr>:exec '!'.b:interpreter<cr>
+nmap <silent> <leader>N :exec '!'.b:repl_with_file<cr>
+nmap <silent> g<c-i> :exec '!'.b:repl<cr>
+nmap <silent> <leader><c-i> :Repl<cr>
 
 command! -range=% ClangFormat exec 'normal m`'|exec '<line1>,<line2>!clang-format "--assume-filename=%:t" --style=file'|exec 'normal ``'
 
@@ -442,6 +438,10 @@ let g:localvimrc_name = ['__meta/.vimrc']
 let g:localvimrc_sandbox = 0
 let g:localvimrc_persistent = 2
 
+" Table mode {{{1
+nmap [ot :TableModeEnable<cr>
+nmap ]ot :TableModeDisable<cr>
+let g:table_mode_map_prefix = '<unused>'
 " }}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -513,7 +513,11 @@ map <silent> <c-w><leader>ac :new %:r.css<cr>
 map <silent> <c-w><leader>as :new %:r.scss<cr>
 
 " neocomplete
-let g:neocomplete#enable_ignore_case = 0
+if ide
+    let g:neocomplete#enable_ignore_case = 0
+    nmap [oN :NeoCompleteEnable<cr>
+    nmap ]oN :NeoCompleteEnable<cr>
+endif
 
 " syntastic {{{1
 if ide
@@ -535,10 +539,13 @@ nmap [c <Plug>GitGutterPrevHunk<Plug>TryFoldOpen
 nmap ]c <Plug>GitGutterNextHunk<Plug>TryFoldOpen
 
 " Python .py {{{1
-au FileType python
-    \ let b:interpreter="python3 %"|
-    \ let b:repl_with_file="python3 -i %"|
-    \ let b:repl="python3"
+function! PythonFt()
+    call system('which ipython3')
+    let py = v:shell_error == 0 ? 'ipython3' : 'python3'
+    let b:interpreter = py.' %'
+    let b:repl_with_file = py.' -i %'
+endfunction
+au FileType python call PythonFt()
 
 let g:pyindent_open_paren = '&sw'
 let g:pyindent_continue = '&sw'
@@ -563,10 +570,10 @@ endif
 
 
 " JavaScript .js {{{1
-au FileType javascript
-    \ let b:interpreter="node -es-staging %"|
-    \ let b:repl_with_file="node -es-staging"|
-    \ let b:repl="node -es-staging"|
+au FileType javascript,typescript
+    \ let b:interpreter="node %"|
+    \ let b:repl_with_file="node"|
+    \ let b:repl="node"|
     \ setlocal foldmethod=syntax
 if has_key(ide_use, 'javascript')
     let g:javascript_enable_domhtmlcss = 1
@@ -587,11 +594,13 @@ if has_key(ide_use, 'typescript')
     let g:typescript_compiler_options='--sourcemap --module commonjs'
     let g:syntastic_typescript_checkers = ['tsuquyomi']
 
-    " Workaround for splitjoin somehow breaking for typescript
-    au FileType typescript
-        \ unlet b:splitjoin_split_callbacks b:splitjoin_join_callbacks|
-        \ source ~/.vim/bundle/splitjoin.vim/ftplugin/typescript/splitjoin.vim|
-        \ nmap <leader>i :TsuImport<cr>
+    function! TypescriptFtIde()
+        " Workaround for splitjoin somehow breaking for typescript
+        unlet b:splitjoin_split_callbacks b:splitjoin_join_callbacks
+        source ~/.vim/bundle/splitjoin.vim/ftplugin/typescript/splitjoin.vim
+        nmap <leader>i :TsuImport<cr>
+    endfunction
+    au FileType typescript call TypescriptFtIde()
 endif
 
 
