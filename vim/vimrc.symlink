@@ -51,6 +51,7 @@ set conceallevel=0
 
 cabbrev help tab help
 command! Dot tabe ~/.vimrc
+nmap <silent> [oD :Dot<cr>
 command! Ldot tabe __meta/.vimrc
 command! Q q
 " Run selected command
@@ -128,6 +129,7 @@ nmap <s-tab> <c-w>k
 " Go to last tab
 au TabLeave * let g:lasttab = tabpagenr()
 nmap <silent> g` :exe "tabn ".g:lasttab<cr>
+nmap <silent> <leader>d :tab sp<cr>
 
 " Terminal.app tab switching {{{1
 for i in [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -231,8 +233,11 @@ imap <f1> <nop>
 imap <c-j> <c-k>*
 imap <c-j>s <c-k>s*
 imap <c-j>f \phi
-imap <c-j>, ≤
-imap <c-j>. ≥
+imap <c-j>P <c-k>P*
+imap <c-j>< ≤
+imap <c-j>> ≥
+imap <c-j>( <c-k>(U
+imap <c-j>) <c-k>)U
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Plugin supported stuff
@@ -394,6 +399,15 @@ let g:SignatureMap = {
     \ 'GotoNextSpotAlpha'  :  "`)",
     \ 'GotoPrevSpotAlpha'  :  "`("
     \}
+
+" surround
+nmap <silent> gs ysiw
+nmap <silent> gS ysiW
+nmap <silent> g( ysiW)i
+nmap <silent> g) ysiw)i
+nmap <silent> g[ ysiW]i
+nmap <silent> g] ysiw]i
+
 if ide
     " splitjoin.vim: gJ, gK
     let g:splitjoin_split_mapping = 'gK'
@@ -615,7 +629,7 @@ function! MarkdownFt()
     nmap <buffer> <silent> <space> :call system('pandown '.expand('%'))<cr>
     nmap <buffer> <silent> g<space> :up<cr>:call system('pandown '.expand('%'))<cr>
     " add bullet point
-    vmap <buffer> <silent> <leader>> :s/^\([^$]\)/-   \1/<cr>:nohls<cr>
+    vmap <buffer> <silent> <leader>> :s/^\(.\)/-   \1/<cr>:nohls<cr>
     " remove bulet point
     vmap <buffer> <silent> <leader>< :s/^[- ]   //<cr>:nohls<cr>
     " wrap with \sth{}
