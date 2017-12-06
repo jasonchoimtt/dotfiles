@@ -48,24 +48,39 @@ prompt_color $PROMPT_COLOR
 which doenv > /dev/null 2>&1 && doenv
 
 # Job list title
-case $TERM in
-    screen*)
-        precmd() {
-            local mark=◦
-            [[ $#jobtexts != 0 ]] && mark=⊕
-            printf "\ek$mark${jobtexts/ */}\e\\"
-        }
-        preexec() {
-            local mark=
-            [ $#jobtexts != 0 ] && mark=˖
-            local job=${1/ */}
-            if [[ job == fg ]]; then
-                job=${jobtexts[%%]/ */}
+if [[ -n "$TMUX" ]]; then
+    _base_title() {
+        for p in $cdxpath; do
+            if [[ "$PWD" == "$p" ]]; then
+                echo "${PWD##*/}" # # is remove prefix, ## is greedy
+                return
+            elif [[ "$PWD" == "$p"* ]]; then
+                local remaining=${PWD#$p/}
+                if [[ "$remaining" == */* ]]; then
+                    echo "${remaining%%/*}/…" # % is remove suffix
+                else
+                    echo "${remaining%%/*}"
+                fi
+                return
             fi
-            printf "\ek$job$mark${jobtexts/ */}\e\\"
-        }
-        ;;
-esac
+        done
+        echo "…/${PWD##*/}"
+    }
+    precmd() {
+        local mark=""
+        [[ $#jobtexts != 0 ]] && mark=" ⊕ "
+        printf "\ek$(_base_title)$mark${jobtexts/ */}\e\\"
+    }
+    preexec() {
+        local mark=
+        [[ $#jobtexts != 0 ]] && mark=" ˖ "
+        local job=${1/ */}
+        if [[ "$job" == "fg" ]]; then
+            job=${jobtexts[%%]/ */}
+        fi
+        printf "\ek$(_base_title) ◦ $job$mark${jobtexts/ */}\e\\"
+    }
+fi
 
 # Quickly vim
 fg_vim() {
