@@ -322,28 +322,21 @@ command! VInstall normal VY:@"<cr>:VundleInstall<cr>
 
 " Colorscheme {{{1
 try
-    function! ApplyTheme()
-        colorscheme lucius
-        LuciusDark
-        " hi clear SignColumn
-        " hi link SignColumn LineNr
-        hi clear LineNr
-        hi clear CursorLineNr
-        hi LineNr ctermfg=241 guifg=#626262
-        " Make fold column stand out less
-        hi clear FoldColumn
-        hi FoldColumn ctermfg=250 ctermbg=238 guifg=#bcbcbc guibg=#444444
-        hi link FoldColumn LineNr
-        " Increase contrast for comments
-        hi Comment ctermfg=246 guifg=#949494
-        " Make folded stand out less
-        hi clear Folded
-        hi Folded ctermfg=250 ctermbg=237 guifg=#bcbcbc guibg=#3a3a3a
-        " Make coneal look normal
-        hi clear Conceal
+    function! MaybeSwitchTheme()
+        let new_light = filereadable('/tmp/light-theme')
+        if g:light != new_light
+            let g:light = new_light
+            color my
+        endif
     endfunction
-    command! Theme call ApplyTheme()
-    Theme
+    command! Theme let g:light = 0 | color my
+    command! ThemeLight let g:light = 1 | color my
+    nmap <silent> <leader>[ :ThemeLight<cr>
+    nmap <silent> <leader>] :Theme<cr>
+
+    let g:light = filereadable('/tmp/light-theme')
+    color my
+    au VimResized * call MaybeSwitchTheme()
 catch /E185/
 endtry
 
