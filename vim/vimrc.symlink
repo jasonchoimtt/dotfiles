@@ -285,6 +285,9 @@ if ide
         Plugin 'davidhalter/jedi-vim'
         " Plugin 'klen/python-mode'
     endif
+    if has_key(ide_use, 'html')
+        Plugin 'othree/html5.vim'
+    endif
     if has_key(ide_use, 'javascript')
         Plugin 'pangloss/vim-javascript'
         Plugin 'ternjs/tern_for_vim'
@@ -413,7 +416,7 @@ if ide
     let g:splitjoin_split_mapping = 'gK'
 
     " closetag.vim
-    let g:closetag_filenames = "*.html,*.hbs,*.jsx,*.xml,*.tsx"
+    let g:closetag_filenames = "*.html,*.hbs,*.jsx,*.xml,*.tsx,*.vue"
 
     " delimitMate
     let delimitMate_expand_cr = 1
@@ -672,9 +675,9 @@ au Syntax markdown call MarkdownSyn()
 
 
 " HTML and templating {{{1
-au FileType html setlocal matchpairs-=<:>
+au FileType html,jinja setlocal matchpairs-=<:>
 au BufRead,BufNewFile *.md set ft=markdown
-au BufRead,BufNewFile *.hbs,*.swig set ft=html
+au BufRead,BufNewFile *.hbs,*.swig,*.vue set ft=html
 if ide
     let g:syntastic_html_checkers = []
 endif
