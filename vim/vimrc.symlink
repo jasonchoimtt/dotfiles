@@ -437,6 +437,9 @@ if ide
     nmap ]E :AnsiEsc<cr>
 endif
 
+command! AutoSave au CursorHold <buffer> update
+command! NoAutoSave au! CursorHold <buffer>
+
 " HTTP client {{{1
 if ide
     let g:http_client_bind_hotkey=0
