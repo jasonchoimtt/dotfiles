@@ -7,7 +7,7 @@ snippet main
 		main()
 
 snippet bp
-	import pdb; pdb.set_trace()
+	import pdb; pdb.set_trace()  # bp
 snippet typ
 	from typing import Dict, List, Optional, Tuple, cast
 
@@ -34,6 +34,9 @@ snippet __i
 		${2:...}
 
 snippet logger
+	import logging
+
+
 	logger = logging.getLogger('`substitute(expand('%:r'), '/', '.', 'g')`')
 snippet :
 	'$1': $1,
@@ -45,3 +48,5 @@ snippet bench_time
 		yield
 		end = time.time()
 		print('{} took {:.2f} seconds'.format(name, end - start))
+snippet pp
+	from pprint import pprint; pprint($0)
