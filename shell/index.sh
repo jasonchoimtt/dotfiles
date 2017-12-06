@@ -94,9 +94,12 @@ hr() {
     _color_seq $HR_COLOR "$(printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' '▔')"
 }
 
+# List of "workspace" directories
+cdxpath=(~)
 
 # Local shell
 [[ -f ~/.localrc ]] && source ~/.localrc
+
 
 if [[ -n "$INTERACTIVE" ]] && [[ -z "$SSH_CLIENT" ]]; then
     printf "$(_color_seq 244)You are at: $PWD @ $(hostname -f)$(_color_seq)\n"

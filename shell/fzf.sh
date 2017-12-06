@@ -34,11 +34,10 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
             done
         }
 
-        cdxpath=(~/w ~/Dropbox/CUHK)
         _xcd_impl() {
             local opts=""
             [ -n $LBUFFER ] && opts="--multi"
-            find ${=cdxpath} -not -path '*/\.*' -maxdepth 2 -type d | _fzf_complete_quoted $opts "$LBUFFER"
+            find "${cdxpath[@]}" -not -path '*/\.*' -maxdepth 2 -type d | _fzf_complete_quoted $opts "$LBUFFER"
         }
         xcd() { _lazycomp 'cd' _xcd_impl; }
         zle -N xcd
@@ -63,7 +62,7 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
         }
         xvim() { _lazycomp 'vim' _xvim_impl; }
         zle -N xvim
-        bindkey '\Cxf' xvim
+        bindkey '\CxF' xvim
 
         _xvimopen_impl() {
             ag -g "" | _fzf_complete_quoted "--multi" "$LBUFFER"
@@ -71,6 +70,13 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
         xvimopen() { _lazycomp 'vim' _xvimopen_impl; }
         zle -N xvimopen
         bindkey '\Cf' xvimopen
+
+        _xvimopen_all_impl() {
+            ag -a -g "" | _fzf_complete_quoted "--multi" "$LBUFFER"
+        }
+        xvimopen_all() { _lazycomp 'vim' _xvimopen_all_impl; }
+        zle -N xvimopen_all
+        bindkey '\Cxf' xvimopen_all
 
         _xopen_impl() {
             ag -g "" | _fzf_complete_quoted "--multi" "$LBUFFER"
