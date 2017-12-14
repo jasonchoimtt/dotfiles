@@ -18,6 +18,6 @@ source "$DOTFILES_ROOT/shell/index.sh"
 
 # Prompt
 prompt_color() {
-    PS1="\[$(_color_seq $1)\]\h:\W $ \[$(_color_seq)\]" # \h
+    PS1="\[$(_color_seq $1)\]\h:\W $ \[$(_color_seq)\]" # Non-breaking space
 }
 prompt_color $PROMPT_COLOR

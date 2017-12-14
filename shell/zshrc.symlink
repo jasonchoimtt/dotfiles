@@ -40,7 +40,7 @@ _get_git_branch() {
 
 setopt PROMPT_SUBST
 prompt_color() {
-    PS1="%F{$1}\$(_get_git_branch :)%c %(?.$.%F{161}$%f) %f"
+    PS1="%F{$1}\$(_get_git_branch :)%c %(?.$.%F{161}$%f) %f" # Non-breaking space
 }
 prompt_color $PROMPT_COLOR
 

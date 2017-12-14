@@ -3,22 +3,15 @@ if-shell "[[ -n \"$SHELL\" ]]" "set-option -g default-shell \"$SHELL\""
 # Clipboard-y fix for tmux
 if-shell "which reattach-to-user-namespace && [[ -n \"$SHELL\" ]]" "set-option -g default-command \"reattach-to-user-namespace -l $SHELL\""
 
+# Version specific stuff
+if-shell "(( `echo \"$(tmux -V | cut -d ' ' -f 2) < 2.4\" | bc -l` ))" \
+    "source-file ~/.dotfiles/tmux/tmux-pre2.4.conf"
+
+if-shell "(( `echo \"$(tmux -V | cut -d ' ' -f 2) >= 2.4\" | bc -l` ))" \
+    "source-file ~/.dotfiles/tmux/tmux-2.4.conf"
+
 # vim hotkeys
 setw -g mode-keys vi
-if-shell "(( `echo \"$(tmux -V | cut -d ' ' -f 2) < 2.4\" | bc -l` ))" "\
-    unbind-key -t vi-copy v;\
-    bind-key -t vi-copy v begin-selection;\
-    bind-key -t vi-copy C-v rectangle-toggle;\
-    bind-key -t vi-copy y copy-pipe \"xclip -sel clip\";\
-    "
-
-if-shell "(( `echo \"$(tmux -V | cut -d ' ' -f 2) >= 2.4\" | bc -l` ))" "\
-    unbind-key -T copy-mode-vi v;\
-    bind-key -T copy-mode-vi v send -X begin-selection;\
-    bind-key -T copy-mode-vi y send -X copy-selection;\
-    "
-if-shell "(( `echo \"$(tmux -V | cut -d ' ' -f 2) >= 2.4\" | bc -l` )) && which reattach-to-user-namespace" "\
-    bind-key -T copy-mode-vi y send -X copy-pipe \"reattach-to-user-namespace pbcopy\""
 
 # Mouse
 set -g mouse on
