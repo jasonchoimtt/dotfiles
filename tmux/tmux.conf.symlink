@@ -86,3 +86,9 @@ set -g window-status-last-style fg=colour99
 set -g window-status-separator ""
 set -g window-status-activity-style fg=colour226
 set -g window-status-bell-style fg=colour1
+
+set -g @plugin 'tmux-plugins/tpm'
+
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+
+if-shell "[[ -d ~/.tmux/plugins/tpm ]]" "run ~/.tmux/plugins/tpm/tpm"

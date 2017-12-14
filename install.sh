@@ -35,3 +35,17 @@ if ! [ -d "$DOTFILES_ROOT/vim/vim.symlink/bundle" ]; then
 else
     info "Vundle is already installed."
 fi
+
+if ! [[ -d "$DOTFILES_ROOT/tmux/tmux.symlink/plugins" ]]; then
+    user "Install tmux plugin manager ([*] continue, [s]kip)?"
+
+    read action
+
+    if [[ "$action" != 's' ]]; then
+        mkdir -p "$DOTFILES_ROOT/tmux/tmux.symlink/plugins"
+        git clone https://github.com/tmux-plugins/tpm "$DOTFILES_ROOT/tmux/tmux.symlink/plugins/tpm"
+        info "Run tmux to install plugins."
+    fi
+else
+    info "Tmux plugin manager is already installed."
+fi

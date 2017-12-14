@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -e
+
+exec tmux new-session \; confirm-before -p 'Restore session?' 'run-shell ~/.tmux/plugins/tmux-resurrect/scripts/restore.sh'
