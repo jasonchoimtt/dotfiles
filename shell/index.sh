@@ -35,12 +35,12 @@ if [[ -n "$INTERACTIVE" ]]; then
     alias l='ls'
     [[ "$(uname -s)" != "Darwin" ]] && alias ls='ls --color=auto'
     alias la='ls -al'
-    alias rm='rm -i'
     alias mv='mv -i'
     alias cp='cp -i'
 
     alias g='git'
     alias vgit='vim . -c Gstatus'
+    vhich() { vim "$(which "$1")"; }
 
     mn() { $1 --help 2>&1 | less -R; }
 
