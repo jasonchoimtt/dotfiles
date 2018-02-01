@@ -49,7 +49,6 @@ set scrolloff=5
 
 set conceallevel=0
 
-cabbrev help tab help
 command! Dot tabe ~/.vimrc
 nmap <silent> [oD :Dot<cr>
 command! Ldot tabe __meta/.vimrc
@@ -178,11 +177,9 @@ vmap <silent> <c-k> :move-2<cr>gv
 " Shell title reporting {{{1
 set titleold=_sh
 set titlestring=‣%{expand('%:t')}%m
-if &term =~ "screen"
+if &term =~ "screen" || &term =~ "xterm"
     set t_ts=k
     set t_fs=\
-endif
-if &term =~ "screen" || &term =~ "xterm"
     set title
 endif
 
@@ -265,19 +262,20 @@ Plugin 'kshenoy/vim-signature'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'tpope/vim-fugitive'
 Plugin 'dhruvasagar/vim-table-mode'
+Plugin 'junegunn/goyo.vim'
+Plugin 'AndrewRadev/splitjoin.vim'
+Plugin 'Raimondi/Delimitmate'
+Plugin 'alvan/vim-closetag'
+Plugin 'MarcWeber/vim-addon-mw-utils'
+Plugin 'tomtom/tlib_vim'
+Plugin 'garbas/vim-snipmate'
 
 if ide
     Plugin 'embear/vim-localvimrc'
-    Plugin 'AndrewRadev/splitjoin.vim'
-    Plugin 'Raimondi/Delimitmate'
-    Plugin 'alvan/vim-closetag'
 
     Plugin 'scrooloose/syntastic'
     Plugin 'aquach/vim-http-client'
     Plugin 'Shougo/neocomplete.vim'
-    Plugin 'MarcWeber/vim-addon-mw-utils'
-    Plugin 'tomtom/tlib_vim'
-    Plugin 'garbas/vim-snipmate'
 
     Plugin 'ap/vim-css-color'
     Plugin 'vim-scripts/AnsiEsc.vim'
@@ -349,17 +347,15 @@ catch /E185/
 endtry
 
 " snipMate {{{1
-if ide
-    let g:snipMate = {}
-    let g:snipMate.scope_aliases = {}
-    let g:snipMate['no_match_completion_feedkeys_chars'] = ''
-    let g:snipMate.snippet_version = 1
-    imap <c-h> <Plug>snipMateNextOrTrigger
-    imap <c-x><c-h> <Plug>snipMateShow
-    smap <c-h> <Plug>snipMateNextOrTrigger
-    xmap <c-h> <Plug>snipMateVisual
-    nmap [oS :SnipMateOpenSnippetFiles<cr><cr>
-endif
+let g:snipMate = {}
+let g:snipMate.scope_aliases = {}
+let g:snipMate['no_match_completion_feedkeys_chars'] = ''
+let g:snipMate.snippet_version = 1
+imap <c-h> <Plug>snipMateNextOrTrigger
+imap <c-x><c-h> <Plug>snipMateShow
+smap <c-h> <Plug>snipMateNextOrTrigger
+xmap <c-h> <Plug>snipMateVisual
+nmap [oS :SnipMateOpenSnippetFiles<cr><cr>
 
 " File navigation {{{1
 nmap <silent> <leader>t :NERDTreeToggle<cr>
@@ -369,10 +365,8 @@ nmap <silent> <leader>E :CtrlPBuffer<cr>
 nmap <silent> <leader>3 :CtrlP %:h<cr>
 nmap <leader>c :lcd %:p:h<cr>
 
-nmap <silent> <leader>f :CtrlPTag<cr>
-nmap <silent> <leader>F :CtrlPBufTag<cr>
-nmap <silent> <c-f>l :CtrlPLine<cr>
-nmap <silent> <c-f>u :CtrlPUndo<cr>
+nmap <silent> <leader>F :CtrlPTag<cr>
+nmap <silent> <leader>f :CtrlPBufTag<cr>
 
 
 let NERDTreeShowBookmarks = 1
@@ -384,6 +378,9 @@ let g:ctrlp_prompt_mappings = {
 \ 'PrtSelectMove("j")':   ['<c-j>', '<down>', '<c-n>'],
 \ 'PrtSelectMove("k")':   ['<c-k>', '<up>', '<c-p>'],
 \ 'PrtClearCache()':      ['<F5>', '<c-@>'],
+\ }
+let g:ctrlp_buftag_types = {
+\ 'typescript': '--language-force=typescript',
 \ }
 call system('which ag')
 if v:shell_error == 0
@@ -411,30 +408,26 @@ nmap <silent> g) ysiw)i
 nmap <silent> g[ ysiW]i
 nmap <silent> g] ysiw]i
 
+" splitjoin.vim: gJ, gK
+let g:splitjoin_split_mapping = 'gK'
+
+" closetag.vim
+let g:closetag_filenames = "*.html,*.hbs,*.jsx,*.xml,*.tsx,*.vue"
+
+" delimitMate
+let delimitMate_expand_cr = 1
+let delimitMate_nesting_quotes = ["'","`"]
+let delimitMate_expand_space = 1
+let delimitMate_excluded_regions = "Comment,String"
+
 if ide
-    " splitjoin.vim: gJ, gK
-    let g:splitjoin_split_mapping = 'gK'
-
-    " closetag.vim
-    let g:closetag_filenames = "*.html,*.hbs,*.jsx,*.xml,*.tsx,*.vue"
-
-    " delimitMate
-    let delimitMate_expand_cr = 1
-    let delimitMate_nesting_quotes = ["'","`"]
-    let delimitMate_expand_space = 1
-    let delimitMate_excluded_regions = "Comment,String"
-
-    " surround
-    nmap <silent> gs ysiw
-    nmap <silent> gS ysiW
-    nmap <silent> g( ysiw)i
-    nmap <silent> g[ ysiw]i
-    nmap <silent> <leader>( ysiW)i
-    nmap <silent> <leader>[ ysiW]i
-
     " AnsiEsc.vim
     nmap [E :AnsiEsc<cr>
     nmap ]E :AnsiEsc<cr>
+
+    " Workaround to remove mapping from dependency of AnsiEsc
+    nmap <Plug>nop_swp <Plug>SaveWinPosn
+    nmap <Plug>nop_rwp <Plug>RestoreWinPosn
 endif
 
 command! AutoSave au CursorHold <buffer> update
@@ -455,6 +448,13 @@ let g:localvimrc_persistent = 2
 nmap [ot :TableModeEnable<cr>
 nmap ]ot :TableModeDisable<cr>
 let g:table_mode_map_prefix = '<unused>'
+
+" Goyo {{{1
+let g:goyo_width = 82
+if !empty($TMUX)
+    autocmd! User GoyoEnter nested call system('tmux setw status off')
+    autocmd! User GoyoLeave nested call system('tmux setw status on')
+endif
 " }}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -466,6 +466,7 @@ if !empty($TMUX)
     command! W Write
     command! Wa wa | call system('tmux send-keys -t {last} C-c Up Enter')
     command! TmuxSaveSwitchRerunWindow w | call system('tmux last-window \; send-keys C-c Up Enter')
+    command! Repl call system('tmux split-pane "'.$SHELL.' -i -c '.b:repl.'"')
 endif
 
 " Number of spaces {{{1
@@ -473,7 +474,7 @@ command! -nargs=1 Spaces setlocal ts=<args> sw=<args> sts=<args>
 
 " Auto readonly {{{1
 function! ConfigReadOnly()
-    if expand('%') =~ '\<node_modules\>'
+    if expand('%') =~ '\(node_modules\|venv\)\/'
         setlocal ro noma
     endif
 endfunction
@@ -542,8 +543,8 @@ if ide
 endif
 
 " fugitive {{{1
-map <silent> gz :Gst<cr>9G
-map <silent> gy <c-w>k-dv
+nmap <silent> gz :Gst<cr>9G
+nmap <silent> gy <c-w>k-dv
 
 " gitgutter {{{1
 let g:gitgutter_sign_column_always = 1
@@ -648,15 +649,14 @@ function! MarkdownFt()
     setl tw=80
     let &l:commentstring=">%s"
     let b:repl_with_file="open %<.pdf"
-    if g:ide
-        let b:delimitMate_quotes = "\" ' ` $"
-        let b:surround_{char2nr('4')} = "$$ \r $$"
-        let b:surround_{char2nr('0')} = "\\left(\r\\right)"
-        let b:surround_{char2nr('9')} = "\\left[\r\\right]"
-        let b:surround_{char2nr('8')} = "**\r**"
-        let b:surround_{char2nr('1')} = "‖\r‖"
-        let b:surround_{char2nr('!')} = "\\left|\r\\right|"
-    endif
+
+    let b:delimitMate_quotes = "\" ' ` $"
+    let b:surround_{char2nr('4')} = "$$ \r $$"
+    let b:surround_{char2nr('0')} = "\\left(\r\\right)"
+    let b:surround_{char2nr('9')} = "\\left[\r\\right]"
+    let b:surround_{char2nr('8')} = "**\r**"
+    let b:surround_{char2nr('1')} = "‖\r‖"
+    let b:surround_{char2nr('!')} = "\\left|\r\\right|"
 endfunction
 au FileType markdown call MarkdownFt()
 
@@ -678,7 +678,7 @@ au Syntax markdown call MarkdownSyn()
 
 
 " HTML and templating {{{1
-au FileType html,jinja setlocal matchpairs-=<:>
+au FileType html,jinja,jinja.html setlocal matchpairs-=<:>
 au BufRead,BufNewFile *.md set ft=markdown
 au BufRead,BufNewFile *.hbs,*.swig,*.vue set ft=html
 if ide
@@ -702,7 +702,7 @@ au FileType ruby
 
 " C .c/C++ .cpp {{{1
 if ide
-    let g:syntastic_cpp_compiler = 'g++-6'
+    let g:syntastic_cpp_compiler = 'g++-7'
     let g:syntastic_cpp_compiler_options = '-Wall -std=c++11'
 endif
 " Vim .vim {{{1
