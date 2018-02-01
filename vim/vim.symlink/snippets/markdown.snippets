@@ -10,6 +10,8 @@ snippet ---notes
 	title: $1
 	author: Jason Choi
 	geometry: a5paper,margin=1.27cm,bottom=1.92cm,footskip=0.65cm
+	header-includes:
+	  - \\usepackage{amsthm}
 	---
 
 snippet ---assg
@@ -104,7 +106,7 @@ snippet \new\D
 	\\newcommand{\\id}{\\,\\D}
 	\\newcommand{\\dd}[3][{}]{\\frac{\\D^{#1} #2}{\\D #3}}
 	\\newcommand{\\dP}[3][{}]{\\frac{\\partial^{#1} #2}{\\partial #3}}
-	<!-- If latex --> \\iftrue \\renewcommand{\\D}{\\operatorname{d}\\!} \\fi
+	<!-- If latex --> \\iftrue\\renewcommand{\\D}{\\operatorname{d}\\!}\\fi
 snippet \new\E
 	\\newcommand{\\E}{\\mathbb{E}}
 snippet ^1
