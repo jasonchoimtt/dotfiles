@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -e
+
+OUTPUT="${1%.*}.pdf"
+
+if [[ "$#" == "1" ]]; then
+    IS_DEFAULT=1
+fi
+
+OPTIONS=(
+    "--from=markdown+pipe_tables${IS_DEFAULT+-latex_macros}"
+    "--pdf-engine=xelatex"
+    "--filter=$HOME/.dotfiles/pandoc/filters/main.py"
+    "--output=$OUTPUT"
+)
+
+PANDOC=/usr/local/bin/pandoc
+if ! [[ -x "$PANDOC" ]]; then
+    PANDOC=$(which pandoc)
+fi
+
+if which reattach-to-user-namespace > /dev/null 2>&1; then
+    # Xelatex needs user namespace to resolve system fonts
+    reattach-to-user-namespace /usr/local/bin/pandoc "${OPTIONS[@]}" "$@"
+else
+    /usr/local/bin/pandoc "${OPTIONS[@]}" "$@"
+fi

@@ -5,3 +5,7 @@ vim/vim.symlink/local/*
 vim/vim.symlink/spell
 tmux/tmux.symlink/plugins
 tmux/tmux.symlink/resurrect
+pandoc/pandoc.symlink/cache/*
+!pandoc/pandoc.symlink/cache/.gitkeep
+
+__pycache__
