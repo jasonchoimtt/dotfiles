@@ -14,16 +14,6 @@ snippet ---notes
 	  - \\usepackage{amsthm}
 	---
 
-snippet ---assg
-	---
-	title: $1
-	author: Choi, Chi Kit (Jason) (70996160)
-
-	date: `strftime("%B %d, %Y")`
-	geometry: letterpaper,left=3.81cm,right=3.81cm,top=2.54cm,bottom=2.54cm
-	---
-
-
 snippet =
 	`substitute(getline(getcurpos()[1]-1), '.', '=', 'g')`
 snippet -
@@ -129,3 +119,6 @@ snippet \ddot
 		$1
 	}
 	\`\`\`
+
+snippet ^
+	^{($1)}

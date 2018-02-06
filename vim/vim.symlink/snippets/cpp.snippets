@@ -2,19 +2,64 @@ snippet cp
 	#include <cstdio>
 	#include <cstring>
 	#include <algorithm>
+	#include <vector>
 	using namespace std;
 
 	#define debug printf
+	/* #define debug(...) */
 	typedef long long ll;
+	typedef pair<int, int> pii;
 
 	${0}
 
 	int main() {
+		int N; scanf("%d", &N);
 		return 0;
 	}
+snippet gcp
+	#include <cstdio>
+	#include <cstring>
+	#include <algorithm>
+	#include <vector>
+	using namespace std;
 
+	#define debug printf
+	/* #define debug(...) */
+	typedef long long ll;
+	typedef pair<int, int> pii;
+
+	void solve(int T) {
+		${0}
+	}
+
+	int main() {
+		int T; scanf("%d", &T);
+		for (int t = 1; t <= T; t++)
+			solve(t);
+		return 0;
+	}
 snippet mainn
 	int main() {
 		${0}
 		return 0;
 	}
+snippet sc
+	int ${1:N}; scanf("%d", &${1});
+snippet Ts
+	int T; scanf("%d", &T);
+	for (int t = 1; t <= T; t++)
+		solve();
+snippet Tst
+	int T; scanf("%d", &T);
+	for (int t = 1; t <= T; t++)
+		solve(t);
+snippet fori
+	for (int i = 0; i < ${1:N}; i++)
+snippet fori1
+	for (int i = 1; i <= ${1:N}; i++)
+snippet forj
+	for (int j = 0; j < ${1:N}; j++)
+snippet forj1
+	for (int j = 1; j <= ${1:N}; j++)
+snippet ms
+	memset($1, 0, sizeof $1);

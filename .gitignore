@@ -1,4 +1,7 @@
 git/gitconfig.local.symlink
 vim/vim.symlink/bundle
+vim/vim.symlink/local/*
+!vim/vim.symlink/local/.gitkeep
+vim/vim.symlink/spell
 tmux/tmux.symlink/plugins
 tmux/tmux.symlink/resurrect
