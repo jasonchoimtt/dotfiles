@@ -7,7 +7,11 @@ snippet main
 		main()
 
 snippet bp
-	import pdb; pdb.set_trace()  # bp
+	import pdb; pdb.set_trace()  # bp FIXME
+snippet ip
+	import IPython; IPython.embed()  # ip FIXME
+snippet exit
+	import sys; sys.exit(1)  # exit FIXME
 snippet typ
 	from typing import Dict, List, Optional, Tuple, cast
 
@@ -28,7 +32,7 @@ snippet class
 			${3:...}
 
 snippet s.
-	self.$1 = $1
+	self.$1 = $1$0
 snippet __i
 	def __init__(self$1) -> None:
 		${2:...}
@@ -50,3 +54,30 @@ snippet bench_time
 		print('{} took {:.2f} seconds'.format(name, end - start))
 snippet pp
 	from pprint import pprint; pprint($0)
+
+snippet setup
+	#!/usr/bin/env python3
+
+	from setuptools import setup
+
+	setup(
+		name='$1',
+		version='0.0.dev0',
+		install_requires=[$0
+			],
+		extras_require={
+			'dev': [
+				'pip-tools',
+				],
+			},
+		)
+
+snippet argparse
+	parser = argparse.ArgumentParser(description='$1')
+
+	subparsers = parser.add_subparsers(dest='command', help='Command')
+	subparsers.required = True
+
+	subparsers.add_parser('$2')
+
+	args = parser.parse_args(sys.argv[1:])
