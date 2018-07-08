@@ -681,10 +681,10 @@ let g:markdown_fenced_languages = ['{\?\.dot.*=dot', '{\?\.python.*=python',  '{
 function MarkdownSyn()
     syn clear markdownItalic markdownError
     unlet b:current_syntax
-    syn include @tex syntax/tex.vim
+    syn include @fasttex syntax/fasttex.vim
     let b:current_syntax='markdown'
-    syn region markdownMath start="\\\@<!\$" end="\$" contains=@tex keepend
-    syn region markdownMath start="\\\@<!\$\$" end="\$\$" contains=@tex keepend
+    syn region markdownMath start="\\\@1<!\$" end="\$" contains=@fasttex keepend
+    syn region markdownMath start="\\\@1<!\$\$" end="\$\$" contains=@fasttex keepend
     syn clear markdownCodeBlock
     syn sync maxlines=50
     set conceallevel=0
