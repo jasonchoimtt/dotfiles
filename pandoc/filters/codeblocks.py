@@ -137,7 +137,7 @@ def python_exec(elem: pf.Element, doc: pf.Doc, args):
         filetype = args['format']
         del attrs['format']
     else:
-        filetype = 'eps' if doc.format == 'latex' else 'png'
+        filetype = 'eps' if doc.format in ('latex', 'beamer') else 'png'
     figure_file = os.path.join(CACHE_DIR, sha + '.python.' + filetype)
     output_file = os.path.join(CACHE_DIR, sha + '.python.txt')
 
@@ -204,7 +204,7 @@ def graphviz_exec(elem: pf.Element, doc: pf.Doc, args):
         filetype = args['format']
         del attrs['format']
     else:
-        filetype = 'pdf' if doc.format == 'latex' else 'png'
+        filetype = 'pdf' if doc.format in ('latex', 'beamer') else 'png'
     figure_file = os.path.join(CACHE_DIR, sha + '.graphviz.' + filetype)
 
     if not os.path.exists(figure_file):

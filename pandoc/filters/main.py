@@ -79,6 +79,39 @@ def break_before_section(elem: pf.Element, doc: pf.Doc):
         return [pf.RawBlock('\\pagebreak', format='latex'), elem]
 
 
+def rewrite_collapse(elem: pf.Element, doc: pf.Doc):
+    if type(elem) == pf.Div and 'collapse' in elem.classes:
+        label = elem.attributes.get('data-label')
+        prefix = [pf.Emph(pf.Str(label)), pf.Str(':'), pf.Space] if label else []
+        if doc.format == 'html':
+            heading = pf.Div(pf.Para(*prefix, pf.Str('[+]')), classes=['label'])
+            main = pf.Div(*elem.content, classes=['main'])
+            while elem.content:
+                elem.content.pop()
+            elem.content.extend([heading, main])
+            return elem
+        else:
+            return [pf.Para(*prefix), *elem.content]
+
+
+def convert_latex(elem: pf.Element, doc: pf.Doc):
+    if type(elem) == pf.RawBlock and elem.format in ('latex', 'tex') and doc.format == 'html':
+        if elem.text == '\\qed':
+            return pf.Para(pf.Str('\u25a1'))
+    if type(elem) == pf.RawInline and elem.format in ('latex', 'tex') and doc.format == 'html':
+        if elem.text == '\\qed':
+            return pf.Span(pf.Str('\u25a1'), attributes={'style': 'display: block; text-align: right'})
+
+
+def add_pandown_javascript(elem: pf.Element, doc: pf.Doc):
+    if (type(elem) == pf.Doc and doc.get_metadata('pandown-preview', False) and
+            doc.format == 'html'):
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pandown.js')) as f:
+            pandown_javascript = f.read()
+        raw = '<script>\n{}\n</script>'.format(pandown_javascript)
+        doc.content.append(pf.RawBlock(raw, format='html'))
+
+
 EXTRACT_FILE_CODEBLOCKS_FILTERS = [
     display_math_align,
     include_files,
@@ -92,7 +125,10 @@ DEFAULT_FILTERS = [
     codeblocks,
     file_codeblocks,
     listings,
-    break_before_section
+    break_before_section,
+    rewrite_collapse,
+    convert_latex,
+    add_pandown_javascript,
     ]
 
 
