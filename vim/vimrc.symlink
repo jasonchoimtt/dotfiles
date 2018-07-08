@@ -127,6 +127,10 @@ nmap <silent> <c-n> 6j
 " Window and tab navigation {{{1
 nmap <tab> <c-w><c-w>
 nmap <s-tab> <c-w>k
+
+" Remap this since <c-i> = <tab>
+nnoremap ,o <c-i>
+
 " Go to last tab
 au TabLeave * let g:lasttab = tabpagenr()
 nmap <silent> g` :exe "tabn ".g:lasttab<cr>
@@ -145,16 +149,7 @@ set timeout timeoutlen=3000 ttimeoutlen=10
 " Quickly replace word under cursor
 nmap g: :%s/\<<c-r><c-w>\>/
 nmap z: :%s/<c-r><c-w>/
-
-" Centering with foldcolumn and numberwidth (gutter) {{{1
-nmap <silent> [, :let &fdc-=1<cr>
-nmap <silent> ], :let &fdc+=1<cr>
-nmap <silent> [< :let &fdc=0<cr>
-nmap <silent> ]< :let &fdc=12<cr>
-nmap <silent> [. :let &nuw-=1<cr>
-nmap <silent> ]. :let &nuw+=1<cr>
-nmap <silent> [> :let &nuw-=5<cr>
-nmap <silent> ]> :let &nuw+=5<cr>
+nmap gr :grep <cword><cr>
 
 " Add trailing character {{{1
 nmap <silent> <leader>, m`A,<esc>``
@@ -173,6 +168,8 @@ nmap <silent> gV `[v`]
 " Move line {{{1
 nmap <silent> <c-j> :move+1<cr>
 nmap <silent> <c-k> :move-2<cr>
+nnoremap <silent> <c-w><c-j> vapd}p
+nnoremap <silent> <c-w><c-k> vapd{{p
 vmap <silent> <c-j> :move'>+1<cr>gv
 vmap <silent> <c-k> :move-2<cr>gv
 
@@ -286,7 +283,6 @@ if ide
         Plugin 'Glench/Vim-Jinja2-Syntax'
         Plugin 'vim-python/python-syntax'
         Plugin 'tmhedberg/SimpylFold'
-        " Plugin 'klen/python-mode'
     endif
     if has_key(ide_use, 'html')
         Plugin 'othree/html5.vim'
@@ -322,6 +318,9 @@ if ide
     endif
     if has_key(ide_use, 'glsl')
         Plugin 'tikhomirov/vim-glsl'
+    endif
+    if has_key(ide_use, 'go')
+        Plugin 'fatih/vim-go'
     endif
 endif
 
@@ -366,6 +365,7 @@ nmap [oS :SnipMateOpenSnippetFiles<cr><cr>
 nmap <silent> <leader>t :NERDTreeToggle<cr>
 nmap <silent> <leader>T :NERDTreeFind<cr>
 nmap <silent> <leader>e :CtrlP<cr>
+nmap <silent> <c-f> :CtrlP<cr>
 nmap <silent> <leader>E :CtrlPBuffer<cr>
 nmap <silent> <leader>3 :CtrlP %:h<cr>
 nmap <leader>c :lcd %:p:h<cr>
@@ -552,7 +552,7 @@ nmap <silent> gz :Gst<cr>9G
 nmap <silent> gy <c-w>k-dv
 
 " gitgutter {{{1
-let g:gitgutter_sign_column_always = 1
+set signcolumn=yes
 nmap <silent> <Plug>TryFoldOpen @=(foldlevel('.')?'zO':'')<cr>
 nmap [c <Plug>GitGutterPrevHunk<Plug>TryFoldOpen
 nmap ]c <Plug>GitGutterNextHunk<Plug>TryFoldOpen
@@ -563,6 +563,7 @@ function! PythonFt()
     let py = v:shell_error == 0 ? 'ipython3' : 'python3'
     let b:interpreter = py.' %'
     let b:repl_with_file = py.' -i %'
+    imap <buffer> <c-q> <c-r>=repeat(' ', match(getline(line('.')-1), '(') - col('.') + 2)<cr>
 endfunction
 au FileType python call PythonFt()
 
@@ -634,7 +635,7 @@ endif
 let g:tex_superscripts= "[0-9a-zA-W.,:;+-<>/()=]"
 let g:tex_subscripts= "0-9aeijoruvx+-/()."
 function! MarkdownFt()
-    let &l:makeprg='mark -o "%:r.pdf" "%" && open -a /Applications/Preview.app "%:r.pdf"'
+    let &l:makeprg='mark "%" && open -a /Applications/Preview.app "%:r.pdf"'
     setl matchpairs-=<:>
     nmap <buffer> <leader>M :up<cr>:Make!<cr>
     nmap <buffer> gX <Plug>Markdown_EditUrlUnderCursor
@@ -645,8 +646,8 @@ function! MarkdownFt()
     " math align to math display
     nmap <buffer> <silent> <leader><bs> :s/&\\| \\\\//g<cr>:nohls<cr>
     " preview
-    nmap <buffer> <silent> <space> :call system('pandown '.expand('%'))<cr>
-    nmap <buffer> <silent> g<space> :up<cr>:call system('pandown '.expand('%'))<cr>
+    nmap <buffer> <silent> <space> :call system('pandown "'.expand('%').'"')<cr>
+    nmap <buffer> <silent> g<space> :up<cr>:call system('pandown "'.expand('%').'"')<cr>
     " add bullet point
     vmap <buffer> <silent> <leader>> :s/^\(.\)/-   \1/<cr>:nohls<cr>
     " remove bulet point
@@ -655,6 +656,8 @@ function! MarkdownFt()
     nmap <buffer> <silent> g\ ysiw}i\
     " delete \left \right
     nmap <buffer> <silent> ds\ /\\right<cr>dft?\\left<cr>dft:nohls<cr>
+    " auto format
+    nmap <cr> gqj
     " add bullet in insert mode
     imap <buffer> <c-_> <bs><bs><bs><bs>-<space><space><space>
     imap <buffer> <c-\> <bs><bs><bs><bs><space><space><space><space>
@@ -740,7 +743,7 @@ au FileType matlab
 " Man pages {{{1
 au FileType man
     \ setlocal ts=8 nolist nornu nonu cc= fdm=indent fdl=99 so=50
-    \|let &titlestring=split(getline('1').getline('2'), '\s\+', 'keepempty')[0].""
+    \|let &titlestring=split(getline('1').getline('2').getline('3'), '\s\+', 'keepempty')[0].""
     \|nmap q ZQ
     \|normal M0
 
