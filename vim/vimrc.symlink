@@ -552,7 +552,11 @@ nmap <silent> gz :Gst<cr>9G
 nmap <silent> gy <c-w>k-dv
 
 " gitgutter {{{1
-set signcolumn=yes
+try
+    set signcolumn=yes
+catch /E518/
+    let g:gitgutter_sign_column_always = 1
+endtry
 nmap <silent> <Plug>TryFoldOpen @=(foldlevel('.')?'zO':'')<cr>
 nmap [c <Plug>GitGutterPrevHunk<Plug>TryFoldOpen
 nmap ]c <Plug>GitGutterNextHunk<Plug>TryFoldOpen
