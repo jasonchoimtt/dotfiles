@@ -42,7 +42,7 @@ if [[ -n "$INTERACTIVE" ]]; then
     alias vgit='vim . -c Gstatus'
     vhich() { vim "$(which "$1")"; }
 
-    mn() { $1 --help 2>&1 | less -R; }
+    mn() { "$@" --help 2>&1 | less -R; }
 
     mkdcd() { mkdir "$1" && cd "$1"; }
 
@@ -80,22 +80,22 @@ if [[ -n "$INTERACTIVE" ]]; then
         doenv_docker
         doenv_python
     }
+
+    # Allow Ctrl-S, Ctrl-Q to be used in vim
+    stty -ixon
+
+    source "$DOTFILES_ROOT/shell/fzf.sh"
+
+    # Horizontal rule
+    HR_COLOR=24
+    hr() {
+        _color_seq $HR_COLOR "$(printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' '▁')"
+        _color_seq $HR_COLOR "$(printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' '▔')"
+    }
+
+    # List of "workspace" directories
+    cdxpath=(~)
 fi
-
-# Allow Ctrl-S, Ctrl-Q to be used in vim
-stty -ixon
-
-source "$DOTFILES_ROOT/shell/fzf.sh"
-
-# Horizontal rule
-HR_COLOR=24
-hr() {
-    _color_seq $HR_COLOR "$(printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' '▁')"
-    _color_seq $HR_COLOR "$(printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' '▔')"
-}
-
-# List of "workspace" directories
-cdxpath=(~)
 
 # Local shell
 [[ -f ~/.localrc ]] && source ~/.localrc
