@@ -2,12 +2,12 @@ set nocompatible
 
 let ide = 0
 let ide_use = {}
-" Valid keys:
-" python, javascript, coffeescript, typescript, rust, android, java
 
 if filereadable(expand('~/.vimrc_local'))
     source ~/.vimrc_local
 endif
+
+let g:ide_use = ide_use
 
 set rtp+=~/.vim/local
 
@@ -51,8 +51,17 @@ set scrolloff=5
 
 set conceallevel=0
 
-command! Dot tabe ~/.vimrc
+function! EditDotFile(name)
+   if strlen(a:name) == 0
+       new ~/.vimrc
+   else
+       exec 'new ~/.vim/plugin/' . a:name . '.vim'
+   endif
+endfunction
+command! -nargs=? Dot call EditDotFile("<args>")
+command! DotFt exec 'Dot '.&ft
 nmap <silent> [oD :Dot<cr>
+nmap <silent> [OD :DotFt<cr>
 command! Ldot tabe __meta/.vimrc
 command! Q q
 " Run selected command
@@ -62,9 +71,9 @@ let mapleader=","
 nnoremap \ ,
 
 " List characters {{{1
-set list listchars=tab:·\ ,trail:-,extends:>,precedes:<,nbsp:+
-autocmd InsertEnter * setlocal nolist
-autocmd InsertLeave * setlocal list
+set listchars=tab:·\ ,trail:-,extends:>,precedes:<,nbsp:+
+" autocmd InsertEnter * setlocal nolist
+" autocmd InsertLeave * setlocal list
 
 " Folded line {{{1
 " http://vim.wikia.com/wiki/Customize_text_for_closed_folds
@@ -272,7 +281,7 @@ Plugin 'garbas/vim-snipmate'
 if ide
     Plugin 'embear/vim-localvimrc'
 
-    Plugin 'scrooloose/syntastic'
+    Plugin 'w0rp/ale'
     Plugin 'aquach/vim-http-client'
     Plugin 'Shougo/neocomplete.vim'
 
@@ -438,6 +447,12 @@ endif
 command! AutoSave au CursorHold <buffer> update
 command! NoAutoSave au! CursorHold <buffer>
 
+" :h last-position-jump
+au BufReadPost *
+\ if line("'\"") > 1 && line("'\"") <= line("$") && &ft !~# 'commit'
+\ |   silent! exe "normal! g`\"zO"
+\ | endif
+
 " HTTP client {{{1
 if ide
     let g:http_client_bind_hotkey=0
@@ -538,13 +553,18 @@ if ide
     nmap ]oN :NeoCompleteEnable<cr>
 endif
 
-" syntastic {{{1
+" ale {{{1
 if ide
-    let g:syntastic_always_populate_loc_list = 1
-    let g:syntastic_auto_loc_list = 2
-    let g:syntastic_enable_highlighting = 0
-    nmap [oC :SyntasticToggleMode<cr>
-    nmap ]oC :SyntasticToggleMode<cr>
+    let g:ale_enabled = 0
+    let g:ale_lint_on_text_changed = 0
+    let g:ale_sign_column_always = 1
+    hi link ALEErrorSign ErrorMsg
+    hi link ALEWarningSign WarningMsg
+    hi link ALEStyleErrorSign WarningMsg
+    hi link ALEWarning SpellLocal
+    hi link ALEStyleError SpellLocal
+    nmap [oC :ALEEnable<cr>
+    nmap ]oC :ALEDisable<cr>
 endif
 
 " fugitive {{{1
@@ -560,196 +580,6 @@ endtry
 nmap <silent> <Plug>TryFoldOpen @=(foldlevel('.')?'zO':'')<cr>
 nmap [c <Plug>GitGutterPrevHunk<Plug>TryFoldOpen
 nmap ]c <Plug>GitGutterNextHunk<Plug>TryFoldOpen
-
-" Python .py {{{1
-function! PythonFt()
-    call system('which ipython3')
-    let py = v:shell_error == 0 ? 'ipython3' : 'python3'
-    let b:interpreter = py.' %'
-    let b:repl_with_file = py.' -i %'
-    imap <buffer> <c-q> <c-r>=repeat(' ', match(getline(line('.')-1), '(') - col('.') + 2)<cr>
-endfunction
-au FileType python call PythonFt()
-
-let g:pyindent_open_paren = '&sw'
-let g:pyindent_continue = '&sw'
-if has_key(ide_use, 'python')
-    " Anti-clash config
-    let g:jedi#auto_vim_configuration = 0
-    let g:jedi#popup_on_dot = 0
-    let g:jedi#popup_select_first = 0
-    let g:jedi#smart_auto_mappings = 0
-    let g:jedi#show_call_signatures = 2
-
-    " Consistent with TypeScript plugin
-    let g:jedi#goto_command = '<c-]>'
-    let g:jedi#rename_command = ',^'
-
-    let g:syntastic_python_checkers = ["pyflakes"]
-
-    let g:python_highlight_builtin_objs = 1
-    let g:python_highlight_builtin_funcs = 1
-    let g:python_highlight_exceptions = 1
-    let g:python_highlight_string_formatting = 1
-    let g:python_highlight_string_format = 1
-    let g:python_highlight_class_vars = 1
-    let g:python_slow_sync = 0
-
-    au FileType python
-      \ let b:delimitMate_nesting_quotes = ['"', "'"]
-endif
-
-
-" JavaScript .js {{{1
-au FileType javascript,typescript
-    \ let b:interpreter="node %"|
-    \ let b:repl_with_file="node"|
-    \ let b:repl="node"|
-    \ setlocal foldmethod=syntax
-if has_key(ide_use, 'javascript')
-    let g:javascript_enable_domhtmlcss = 1
-    let g:syntastic_javascript_checkers = ["eslint"]
-    let g:snipMate.scope_aliases['javascript'] = 'javascript,javascript.es6'
-    command! EslintFix exec '!eslint --fix "%"' | SyntasticCheck
-endif
-
-
-" CoffeeScript .coffee .{{{1
-if has_key(ide_use, 'coffeescript')
-    au FileType coffee set makeprg= " Accidental compilation may shield the .coffee
-    au FileType coffee setlocal ts=2 sw=2 sts=2
-endif
-
-" TypeScript .ts {{{1
-if has_key(ide_use, 'typescript')
-    let g:typescript_compiler_options='--sourcemap --module commonjs'
-    let g:syntastic_typescript_checkers = ['tsuquyomi']
-
-    function! TypescriptFtIde()
-        " Workaround for splitjoin somehow breaking for typescript
-        unlet b:splitjoin_split_callbacks b:splitjoin_join_callbacks
-        source ~/.vim/bundle/splitjoin.vim/ftplugin/typescript/splitjoin.vim
-        nmap <leader>i :TsuImport<cr>
-    endfunction
-    au FileType typescript call TypescriptFtIde()
-endif
-
-
-" Markdown .md {{{1
-let g:tex_superscripts= "[0-9a-zA-W.,:;+-<>/()=]"
-let g:tex_subscripts= "0-9aeijoruvx+-/()."
-function! MarkdownFt()
-    let &l:makeprg='mark "%" && open -a /Applications/Preview.app "%:r.pdf"'
-    setl matchpairs-=<:>
-    nmap <buffer> <leader>M :up<cr>:Make!<cr>
-    nmap <buffer> gX <Plug>Markdown_EditUrlUnderCursor
-    " math display to math align
-    nmap <buffer> <silent> <leader>& $Bi\\<cr><esc>k0ea&<esc>0f=i&<esc>o<tab>
-    " math align add line break
-    nmap <buffer> <silent> <leader>\ :s/\.\?$/ \\\\<cr>:nohls<cr>o
-    " math align to math display
-    nmap <buffer> <silent> <leader><bs> :s/&\\| \\\\//g<cr>:nohls<cr>
-    " preview
-    nmap <buffer> <silent> <space> :call system('pandown "'.expand('%').'"')<cr>
-    nmap <buffer> <silent> g<space> :up<cr>:call system('pandown "'.expand('%').'"')<cr>
-    " add bullet point
-    vmap <buffer> <silent> <leader>> :s/^\(.\)/-   \1/<cr>:nohls<cr>
-    " remove bulet point
-    vmap <buffer> <silent> <leader>< :s/^[- ]   //<cr>:nohls<cr>
-    " wrap with \sth{}
-    nmap <buffer> <silent> g\ ysiw}i\
-    " delete \left \right
-    nmap <buffer> <silent> ds\ /\\right<cr>dft?\\left<cr>dft:nohls<cr>
-    " auto format
-    nmap <cr> gqj
-    " add bullet in insert mode
-    imap <buffer> <c-_> <bs><bs><bs><bs>-<space><space><space>
-    imap <buffer> <c-\> <bs><bs><bs><bs><space><space><space><space>
-    setl tw=80
-    let &l:commentstring=">%s"
-    let b:repl_with_file="open %<.pdf"
-
-    let b:delimitMate_quotes = "\" ' ` $"
-    let b:surround_{char2nr('4')} = "$$ \r $$"
-    let b:surround_{char2nr('0')} = "\\left(\r\\right)"
-    let b:surround_{char2nr('9')} = "\\left[\r\\right]"
-    let b:surround_{char2nr('8')} = "**\r**"
-    let b:surround_{char2nr('1')} = "‖\r‖"
-    let b:surround_{char2nr('!')} = "\\left|\r\\right|"
-endfunction
-au FileType markdown call MarkdownFt()
-
-" Builtin markdown runtime
-let g:markdown_syntax_conceal = 0
-let g:markdown_fenced_languages = ['{\?\.dot.*=dot', '{\?\.python.*=python',  '{\?\.matlab.*=matlab',  '{\?\.\(ba\)\?sh.*=sh']
-function MarkdownSyn()
-    syn clear markdownItalic markdownError
-    unlet b:current_syntax
-    syn include @fasttex syntax/fasttex.vim
-    let b:current_syntax='markdown'
-    syn region markdownMath start="\\\@1<!\$" end="\$" contains=@fasttex keepend
-    syn region markdownMath start="\\\@1<!\$\$" end="\$\$" contains=@fasttex keepend
-    syn clear markdownCodeBlock
-    syn sync maxlines=50
-    set conceallevel=0
-endfunction
-au Syntax markdown call MarkdownSyn()
-
-
-" HTML and templating {{{1
-au FileType html,jinja,jinja.html setlocal matchpairs-=<:>
-au BufRead,BufNewFile *.md set ft=markdown
-au BufRead,BufNewFile *.hbs,*.swig,*.vue set ft=html
-if ide
-    let g:syntastic_html_checkers = []
-endif
-
-
-" Rust .rs {{{1
-if has_key(ide_use, 'rust')
-    au FileType rust setlocal cc=100|
-        \ compiler rustc
-endif
-
-
-" Ruby .rb {{{1
-au FileType ruby
-    \ let b:interpreter="ruby %"|
-    \ let b:repl_with_file="irb -I . -r %"|
-    \ let b:repl="irb"
-
-
-" C .c/C++ .cpp {{{1
-if ide
-    let g:syntastic_cpp_compiler = 'g++-7'
-    let g:syntastic_cpp_compiler_options = '-Wall -std=c++11'
-endif
-" Vim .vim {{{1
-au FileType vim setlocal foldmethod=marker foldlevel=0
-" Elm .elm {{{1
-if has_key(ide_use, 'elm')
-    let g:elm_setup_keybindings = 0
-    let g:elm_syntastic_show_warnings = 1
-    let g:syntastic_elm_checkers = ['elm_make']
-end
-" YAML .yaml {{{1
-au FileType yaml setlocal ts=2 sw=2 sts=2
-" Java .java {{{1
-if has_key(ide_use, 'java')
-    au FileType java
-        \ setlocal omnifunc=javacomplete#Complete
-    au FileType java
-        \ map <buffer> <leader>i :JCimportAdd<cr>
-endif
-" Matlab .m {{{1
-au FileType matlab
-    \ setlocal commentstring=%%s
-" Man pages {{{1
-au FileType man
-    \ setlocal ts=8 nolist nornu nonu cc= fdm=indent fdl=99 so=50
-    \|let &titlestring=split(getline('1').getline('2').getline('3'), '\s\+', 'keepempty')[0].""
-    \|nmap q ZQ
-    \|normal M0
 
 " let $MANPAGER='cat'
 " function! Man(...)
@@ -771,10 +601,3 @@ au FileType man
 " endfunction
 " command! -nargs=? Man call Man(<q-args>)
 " nmap <silent> K :Man<cr>
-
-" Help {{{1
-function! HelpFt()
-    setl buflisted
-    nmap <silent><buffer>   <cr> <c-]>
-endfunction
-au FileType help call HelpFt()
