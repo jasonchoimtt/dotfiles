@@ -12,9 +12,19 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
 
     if [ $SHELL_TYPE '==' zsh ]; then
         _lazycomp() {
-            local lbuf=$LBUFFER
-            eval "$2"
-            if [[ -z $lbuf && -n $LBUFFER ]]; then
+            local orig_lbuf=$LBUFFER tokens=(${(z)LBUFFER}) prefix lbuf
+
+            if [[ "$LBUFFER" == *\  ]]; then
+                prefix=
+                lbuf=$LBUFFER
+            else
+                prefix=${tokens[-1]}
+                lbuf=${LBUFFER:0:-${#prefix}}
+            fi
+
+            prefix=$prefix "$2" "$lbuf"
+
+            if [[ -z "$lbuf" && "$orig_lbuf" != "$LBUFFER" ]]; then
                 LBUFFER="$1 $LBUFFER"
                 zle accept-line
             else
@@ -37,7 +47,7 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
         _xcd_impl() {
             local opts=""
             [ -n $LBUFFER ] && opts="--multi"
-            find "${cdxpath[@]}" -not -path '*/\.*' -maxdepth 2 -type d | _fzf_complete_quoted $opts "$LBUFFER"
+            find "${cdxpath[@]}" -not -path '*/\.*' -maxdepth 2 -type d | _fzf_complete_quoted $opts "$@"
         }
         xcd() { _lazycomp 'cd' _xcd_impl; }
         zle -N xcd
@@ -46,7 +56,7 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
         _xcdr_impl() {
             cdr -l | while read line; do
                 echo ${line[6,${#line}]}
-            done | _fzf_complete_quoted "" "$LBUFFER"
+            done | _fzf_complete_quoted "" "$@"
         }
         xcdr() { _lazycomp 'cd' _xcdr_impl; }
         zle -N xcdr
@@ -58,35 +68,53 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
                     line=${line[3,${#line}]}
                     [ -f ${line/\~/$HOME} ] && [[ $line =~ '~' ]] && echo $line
                 fi
-            done < ~/.viminfo | _fzf_complete_quoted "--multi" "$LBUFFER"
+            done < ~/.viminfo | _fzf_complete_quoted "--multi" "$@"
         }
         xvim() { _lazycomp 'vim' _xvim_impl; }
         zle -N xvim
         bindkey '\CxF' xvim
 
         _xvimopen_impl() {
-            ag -g "" | _fzf_complete_quoted "--multi" "$LBUFFER"
+            if [[ "$prefix" == */ && -d "$prefix" && "$prefix" != *\ * ]]; then
+                (cd "$prefix" && ag -g "") | prefix= _fzf_complete_quoted "--multi --prompt=>$prefix" "$1$prefix"
+            else
+                ag -g "" | _fzf_complete_quoted "--multi" "$@"
+            fi
         }
         xvimopen() { _lazycomp 'vim' _xvimopen_impl; }
         zle -N xvimopen
         bindkey '\Cf' xvimopen
 
         _xvimopen_all_impl() {
-            ag -a -g "" | _fzf_complete_quoted "--multi" "$LBUFFER"
+            if [[ "$prefix" == */ && -d "$prefix" && "$prefix" != *\ * ]]; then
+                (cd "$prefix" && ag -u -g "") | prefix= _fzf_complete_quoted "--multi --prompt=>$prefix" "$1$prefix"
+            else
+                ag -u -g "" | _fzf_complete_quoted "--multi" "$@"
+            fi
         }
         xvimopen_all() { _lazycomp 'vim' _xvimopen_all_impl; }
         zle -N xvimopen_all
         bindkey '\Cxf' xvimopen_all
 
         _xopen_impl() {
-            ag -g "" | _fzf_complete_quoted "--multi" "$LBUFFER"
+            ag -g "" | _fzf_complete_quoted "--multi" "$@"
         }
         xopen() { _lazycomp 'open' _xopen_impl; }
         zle -N xopen
         bindkey '\Cxo' xopen
 
+        _is_git() {
+            if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+                true
+            else
+                zle -M "not a git repository"
+                false
+            fi
+        }
+
         _xgitstatus_impl() {
-            git -c color.status=always status -s | _fzf_complete "--multi --ansi --nth=2" "$LBUFFER"
+            _is_git || return
+            git -c color.status=always status -s | _fzf_complete "--multi --ansi --nth=2" "$@"
         }
         _xgitstatus_impl_post() {
             cut -b 3- | while read item; do
@@ -98,12 +126,13 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
         bindkey '\Cxg' xgitstatus
 
         _xgitlog_impl() {
+            _is_git || return
             local commit=HEAD
             [[ -n "$gref" ]] && commit=$gref
             local count=$(( $(git rev-list --count $commit) - 1 ))
             local min=$(( $count > 9 ? 9 : $count ))
             git --no-pager log --pretty=oneline --color --abbrev-commit $commit~$min..$commit | \
-                _fzf_complete "--multi --ansi --nth=1" "$LBUFFER"
+                _fzf_complete "--multi --ansi --nth=1" "$@"
         }
         _xgitlog_impl_post() {
             cut -d ' ' -f 1
