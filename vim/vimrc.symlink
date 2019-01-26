@@ -498,7 +498,8 @@ function! ConfigReadOnly()
         setlocal ro noma
     endif
 endfunction
-autocmd BufRead * call ConfigReadOnly()
+" BufReadPre so that it is set before FileType
+autocmd BufReadPre * call ConfigReadOnly()
 
 " Switch file {{{1
 function! SuperSwitchFile()
@@ -555,16 +556,38 @@ endif
 
 " ale {{{1
 if ide
-    let g:ale_enabled = 0
-    let g:ale_lint_on_text_changed = 0
     let g:ale_sign_column_always = 1
+    " let g:ale_pattern_options = {'': {'ale_enabled': 0}}
     hi link ALEErrorSign ErrorMsg
     hi link ALEWarningSign WarningMsg
     hi link ALEStyleErrorSign WarningMsg
     hi link ALEWarning SpellLocal
     hi link ALEStyleError SpellLocal
-    nmap [oC :ALEEnable<cr>
-    nmap ]oC :ALEDisable<cr>
+    nmap [oA :ALEEnableBuffer<cr>
+    nmap ]oA :ALEDisableBuffer<cr>
+
+    " Disable by default: should call ALEEnableBuffer in plugin/{ft}.vim
+    " BufRead seems to run after FileType
+    function! MyALEDefaults()
+        if !exists('b:ale_linters')
+            let b:ale_linters = []
+            let b:ale_fixers = []
+        endif
+    endfunction
+    autocmd BufRead * call MyALEDefaults()
+
+    " Active mode: Lint on text changed
+    let g:my_ale_lint = 1
+    nmap [oa :let g:my_ale_lint = 1<cr>
+    nmap ]oa :let g:my_ale_lint = 0<cr>
+
+    function! MyALELint()
+        if g:my_ale_lint
+            call ale#Queue(200)  " delay
+        endif
+    endfunction
+    autocmd TextChanged,TextChangedI * call MyALELint()
+    let g:ale_lint_on_text_changed = 0
 endif
 
 " fugitive {{{1
