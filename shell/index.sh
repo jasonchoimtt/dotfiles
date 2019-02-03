@@ -40,6 +40,7 @@ if [[ -n "$INTERACTIVE" ]]; then
 
     alias g='git'
     alias vgit='vim . -c Gstatus -c only -c "normal 8G"'
+    alias jsont='python3 -m json.tool'
     vhich() { vim "$(which "$1")"; }
 
     mn() { "$@" --help 2>&1 | less -R; }
@@ -96,6 +97,14 @@ if [[ -n "$INTERACTIVE" ]]; then
     # List of "workspace" directories
     cdxpath=(~)
 fi
+
+pastecmd() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: pastecmd [command name]" >&2
+    else
+        eval "$1() { $(pbpaste) \"\$@\" ; }"
+    fi
+}
 
 # Local shell
 [[ -f ~/.localrc ]] && source ~/.localrc
