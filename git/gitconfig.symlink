@@ -7,8 +7,9 @@
     com = commit
     commit-af = commit --amend --no-edit
     merge-ff = merge --ff-only
-    log = log ---graph --decorate
-    vlog = log --graph --decorate --pretty=short --abbrev-commit
+    # https://git-scm.com/docs/pretty-formats
+    l = log --graph --abbrev-commit --format='%h %Cgreen%an%Creset - %s %C(auto)%d%Creset' -n 10
+    lg = log --graph
     wc = whatchanged
     cp = cherry-pick
 [core]
@@ -16,6 +17,7 @@
     editor = vim
 [diff]
     tool = vimdiff
+    colorMoved = default
 [merge]
     tool = vimdiff
 [push]

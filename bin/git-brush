@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+
+if [[ -z "$1" ]]; then
+    echo "Usage: git grush <branch>" >&2
+    exit 1
+fi
+
+branch=$1
+shift
+
+git branch "$branch" && git checkout "$branch" && git push -u origin "$branch"
