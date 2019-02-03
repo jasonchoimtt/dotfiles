@@ -3,6 +3,7 @@ vim/vim.symlink/bundle
 vim/vim.symlink/local/*
 !vim/vim.symlink/local/.gitkeep
 vim/vim.symlink/spell
+vim/vim.symlink/view
 tmux/tmux.symlink/plugins
 tmux/tmux.symlink/resurrect
 pandoc/pandoc.symlink/cache/*

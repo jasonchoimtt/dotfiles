@@ -477,6 +477,19 @@ if !empty($TMUX)
 endif
 " }}}
 
+function! Preserve(command)
+    try
+        " Preparation: save last search, and cursor position.
+        let l:win_view = winsaveview()
+        let l:old_query = getreg('/')
+        silent! execute 'keepjumps ' . a:command
+    finally
+        " try restore / reg and cursor position
+        call winrestview(l:win_view)
+        call setreg('/', l:old_query)
+    endtry
+endfunction
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " File types and related plugins
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
