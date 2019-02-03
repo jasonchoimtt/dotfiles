@@ -15,7 +15,6 @@ setw -g mode-keys vi
 
 # Mouse
 set -g mouse on
-bind -n C-WheelUpPane copy-mode
 
 # Terminal compat
 set -g default-terminal "xterm-256color"  # HACK
@@ -23,7 +22,7 @@ set -sg escape-time 0
 set -g focus-events on
 
 # History
-set -g history-limit 10000
+set -g history-limit 100000
 
 # Window indexing
 set -g base-index 1
@@ -32,7 +31,6 @@ set -g renumber-windows on
 
 # For multiple session for same window group
 setw -g aggressive-resize on
-bind-key @ confirm-before kill-session
 
 # for M-3 M-4
 setw -g other-pane-height 10
@@ -59,10 +57,6 @@ bind-key l select-pane -R
 
 unbind-key ,
 bind-key , setw allow-rename off \; command-prompt -I "" "rename-window '%%'"
-
-# Sane scrolling
-bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -t = -M" "if -Ft= '#{pane_in_mode}' 'send-keys -t = -M' 'copy-mode -t = -e; send-keys -t = -M'"
-bind -n WheelDownPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -t = -M" "if -Ft= '#{pane_in_mode}' 'send-keys -t = -M' 'copy-mode -t = -e; send-keys -t = -M'"
 
 bind-key a split-window -hb -l 30 -c "#{pane_current_path}" "vifm ."
 if-shell "which open" "bind-key e run-shell \"open \\\"#{pane_current_path}\\\"\""
