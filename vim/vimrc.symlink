@@ -326,6 +326,9 @@ if ide
     if has_key(ide_use, 'java')
         Plugin 'artur-shaik/vim-javacomplete2'
     endif
+    if has_key(ide_use, 'kotlin')
+        Plugin 'udalov/kotlin-vim'
+    endif
     if has_key(ide_use, 'glsl')
         Plugin 'tikhomirov/vim-glsl'
     endif
