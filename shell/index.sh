@@ -39,7 +39,7 @@ if [[ -n "$INTERACTIVE" ]]; then
     alias cp='cp -i'
 
     alias g='git'
-    alias vgit='vim . -c Gstatus'
+    alias vgit='vim . -c Gstatus -c only -c "normal 8G"'
     vhich() { vim "$(which "$1")"; }
 
     mn() { "$@" --help 2>&1 | less -R; }

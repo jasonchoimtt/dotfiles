@@ -110,6 +110,27 @@ if [[ -n "$TMUX" ]]; then
     }
 fi
 
+# Messages at a glance
+_do_message() {
+    local content char sym
+    content=$(echo && "$@")
+    echo "$content"
+    read -k char
+    sym=$(tput cuu1 el)
+    echo -n "$(while IFS= read -r line; do echo -n "$sym"; done <<< "$content")"
+    zle reset-prompt
+    zle -U "$char"
+}
+_message_git_st() { _do_message git -c color.status=always st; }
+zle -N _message_git_st
+bindkey '\es' _message_git_st
+
+_message_git_l_inner() { git -c color.status=always st | head -n 1 && git -c color.status=always l --color; }
+_message_git_l() { _do_message _message_git_l_inner; }
+zle -N _message_git_l
+bindkey '\eg' _message_git_l
+
+
 # Syntax highlighting
 # Must be at the bottom
 if [[ -n "$BREW_PREFIX" ]] && [[ -f $BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
