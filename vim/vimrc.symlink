@@ -80,6 +80,7 @@ set listchars=tab:·\ ,trail:-,extends:>,precedes:<,nbsp:+
 " Set a nicer foldtext function
 function! MyFoldText()
     let line = getline(v:foldstart)
+    let line = substitute(line, '\t', repeat(' ', &ts), 'g')
     let line = substitute(line, '\e[^m]*m', '', 'g')
     if line =~ '^[ \t]*\(\/\*\|\/\/\)[*/\\]*[ \t]*$'
         let initial = substitute(line, '^\([ \t]\)*\(\/\*\|\/\/\)\(.*\)', '\1\2', '')
@@ -516,7 +517,8 @@ autocmd BufReadPre * call ConfigReadOnly()
 
 " Switch file {{{1
 function! SuperSwitchFile()
-    let ext = matchstr(expand('%'), '\.[^.]\+$')
+    let fname = expand('%')
+    let ext = matchstr(fname, '\.[^.]\+$')
     if ext == '.ts' || ext == '.js' || ext == '.jsx'
         if expand('%') =~ '\.spec\.[jt]sx\?$'
             exec 'edit %:r:r'.ext
@@ -545,6 +547,10 @@ function! SuperSwitchFile()
                 echo "No c/cpp file found"
             endtry
         endtry
+    elseif fname =~ '.pb.go$'
+        edit %:r:r.proto
+    elseif ext == '.proto'
+        edit %:r.pb.go
     endif
 endfunction
 function! SwitchFile(ext, command)
@@ -606,6 +612,7 @@ endif
 " fugitive {{{1
 nmap <silent> gz :Gst<cr>9G
 nmap <silent> gy <c-w>k-dv
+nmap <silent> gY <c-w>kjdv
 
 " gitgutter {{{1
 try
