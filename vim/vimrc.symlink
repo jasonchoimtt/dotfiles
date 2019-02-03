@@ -397,13 +397,21 @@ let g:ctrlp_prompt_mappings = {
 let g:ctrlp_buftag_types = {
 \ 'typescript': '--language-force=typescript',
 \ }
-call system('which ag')
+call system('which rg')
 if v:shell_error == 0
-    " For some reason using %s instead of . will make ag not respect .gitignore
-    let g:ctrlp_user_command = 'true %s && ag -g "" .'
+    let g:ctrlp_user_command = 'rg --files %s'
     let g:ctrlp_use_caching = 0
-    set grepprg=ag\ --vimgrep\ $*
+    set grepprg=rg\ --vimgrep\ $*
     set grepformat=%f:%l:%c:%m
+else
+    call system('which ag')
+    if v:shell_error == 0
+        " For some reason using %s instead of . will make ag not respect .gitignore
+        let g:ctrlp_user_command = 'true %s && ag -g "" .'
+        let g:ctrlp_use_caching = 0
+        set grepprg=ag\ --vimgrep\ $*
+        set grepformat=%f:%l:%c:%m
+    endif
 endif
 
 " Other editing magic {{{1
