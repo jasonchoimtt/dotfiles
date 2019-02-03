@@ -1,5 +1,5 @@
 let g:lucius_style = exists('g:light') && g:light ? 'light' : 'dark'
-let g:lucius_contrast = 'normal'
+let g:lucius_contrast = 'high'
 let g:lucius_contrast_bg = 'normal'
 runtime colors/lucius.vim
 
@@ -21,8 +21,11 @@ hi link FoldColumn LineNr
 hi Comment ctermfg=246 guifg=#949494
 
 " Make folded stand out less
-" hi clear Folded
-" hi Folded ctermfg=250 ctermbg=237 guifg=#bcbcbc guibg=#3a3a3a
+if g:light
+    hi Folded ctermfg=241 ctermbg=254 guifg=#626262 guibg=#e4e4e4
+else
+    " hi Folded ctermfg=250 ctermbg=237 guifg=#bcbcbc guibg=#3a3a3a
+endif
 
 " Make coneal look normal
 hi clear Conceal
