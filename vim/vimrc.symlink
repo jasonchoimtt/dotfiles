@@ -390,6 +390,7 @@ nmap <silent> <leader>f :CtrlPBufTag<cr>
 
 
 let NERDTreeShowBookmarks = 1
+let NERDTreeWinPos = 'right'
 
 let g:ctrlp_map = ''
 let g:ctrlp_working_path_mode = ''
@@ -529,11 +530,19 @@ endfunction
 autocmd BufReadPre * call ConfigReadOnly()
 
 " Switch file {{{1
+function! SwitchFile(ext)
+    let fname = expand('%')
+    if fname =~ '\.\(spec\|sandbox\)\.[jt]sx\?$'
+        exec 'edit %:r:r'.a:ext
+    else
+        exec 'edit %:r'.a:ext
+    endif
+endfunction
 function! SuperSwitchFile()
     let fname = expand('%')
     let ext = matchstr(fname, '\.[^.]\+$')
     if ext == '.ts' || ext == '.js' || ext == '.jsx'
-        if expand('%') =~ '\.spec\.[jt]sx\?$'
+        if fname =~ '\.\(spec\|sandbox\)\.[jt]sx\?$'
             exec 'edit %:r:r'.ext
         else
             exec 'edit %:r.spec'.ext
@@ -566,14 +575,12 @@ function! SuperSwitchFile()
         edit %:r.pb.go
     endif
 endfunction
-function! SwitchFile(ext, command)
-    exec 'edit %:r.'.a:ext
-endfunction
 map <silent> <leader>s :call SuperSwitchFile()<cr>
-map <silent> <leader>at :e %:r.ts<cr>
-map <silent> <leader>ah :e %:r.html<cr>
-map <silent> <leader>ac :e %:r.css<cr>
-map <silent> <leader>as :e %:r.scss<cr>
+map <silent> <leader>at :call SwitchFile('.ts')<cr>
+map <silent> <leader>ah :call SwitchFile('.html')<cr>
+map <silent> <leader>ac :call SwitchFile('.css')<cr>
+map <silent> <leader>as :call SwitchFile('.scss')<cr>
+map <silent> <leader>ab :call SwitchFile('.sandbox.ts')<cr>
 map <silent> <c-w><leader>at :new %:r.ts<cr>
 map <silent> <c-w><leader>ah :new %:r.html<cr>
 map <silent> <c-w><leader>ac :new %:r.css<cr>
