@@ -7,7 +7,8 @@ if-shell "which reattach-to-user-namespace && [[ -n \"$SHELL\" ]]" "set-option -
 if-shell "(( `echo \"$(tmux -V | cut -d ' ' -f 2) < 2.4\" | bc -l` ))" \
     "source-file ~/.dotfiles/tmux/tmux-pre2.4.conf"
 
-if-shell "(( `echo \"$(tmux -V | cut -d ' ' -f 2) >= 2.4\" | bc -l` ))" \
+# This also supports weird versions like 2.9a
+if-shell "! (( `echo \"$(tmux -V | cut -d ' ' -f 2) < 2.4\" | bc -l` ))" \
     "source-file ~/.dotfiles/tmux/tmux-2.4.conf"
 
 # vim hotkeys
