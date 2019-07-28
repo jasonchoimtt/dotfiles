@@ -9,9 +9,12 @@
     merge-ff = merge --ff-only
     # https://git-scm.com/docs/pretty-formats
     l = log --graph --abbrev-commit --format='%h %Cgreen%an%Creset - %s %C(auto)%d%Creset' -n 10
+    ll = log --graph --abbrev-commit --format='%h %Cgreen%an%Creset - %s %C(auto)%d%Creset (%aD)'
     lg = log --graph
     wc = whatchanged
     cp = cherry-pick
+    di = diff
+    dic = diff --cached
 [core]
     excludesfile = ~/.gitignore
     editor = vim
