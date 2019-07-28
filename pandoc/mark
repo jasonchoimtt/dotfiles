@@ -21,7 +21,7 @@ fi
 
 if which reattach-to-user-namespace > /dev/null 2>&1; then
     # Xelatex needs user namespace to resolve system fonts
-    reattach-to-user-namespace /usr/local/bin/pandoc "${OPTIONS[@]}" "$@"
+    reattach-to-user-namespace "$PANDOC" "${OPTIONS[@]}" "$@"
 else
-    /usr/local/bin/pandoc "${OPTIONS[@]}" "$@"
+    "$PANDOC" "${OPTIONS[@]}" "$@"
 fi
