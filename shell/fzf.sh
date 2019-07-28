@@ -5,7 +5,10 @@ fi
 # Initialize fzf and related fuzzy finding, if available
 if [ -f ~/.fzf.$SHELL_TYPE ]; then
     source ~/.fzf.$SHELL_TYPE
-    if which ag > /dev/null 2>&1; then
+    if which rg > /dev/null 2>&1; then
+        export FZF_DEFAULT_COMMAND='rg --files'
+        export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    elif which ag > /dev/null 2>&1; then
         export FZF_DEFAULT_COMMAND='ag -g ""'
         export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
     fi
@@ -76,9 +79,9 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
 
         _xvimopen_impl() {
             if [[ "$prefix" == */ && -d "$prefix" && "$prefix" != *\ * ]]; then
-                (cd "$prefix" && ag -g "") | prefix= _fzf_complete_quoted "--multi --prompt=>$prefix" "$1$prefix"
+                (cd "$prefix" && $=FZF_DEFAULT_COMMAND) | prefix= _fzf_complete_quoted "--multi --prompt=>$prefix" "$1$prefix"
             else
-                ag -g "" | _fzf_complete_quoted "--multi" "$@"
+                $=FZF_DEFAULT_COMMAND | _fzf_complete_quoted "--multi" "$@"
             fi
         }
         xvimopen() { _lazycomp 'vim' _xvimopen_impl; }
@@ -97,7 +100,7 @@ if [ -f ~/.fzf.$SHELL_TYPE ]; then
         bindkey '\Cxf' xvimopen_all
 
         _xopen_impl() {
-            ag -g "" | _fzf_complete_quoted "--multi" "$@"
+            $=FZF_DEFAULT_COMMAND | _fzf_complete_quoted "--multi" "$@"
         }
         xopen() { _lazycomp 'open' _xopen_impl; }
         zle -N xopen
