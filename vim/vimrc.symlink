@@ -657,3 +657,5 @@ nmap ]c <Plug>GitGutterNextHunk<Plug>TryFoldOpen
 " endfunction
 " command! -nargs=? Man call Man(<q-args>)
 " nmap <silent> K :Man<cr>
+
+autocmd FileType qf setl nowrap
