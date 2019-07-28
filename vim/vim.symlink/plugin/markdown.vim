@@ -21,7 +21,7 @@ function FtMarkdown()
     " delete \left \right
     nmap <buffer> <silent> ds\ /\\right<cr>dft?\\left<cr>dft:nohls<cr>
     " auto format
-    nmap <cr> gqj
+    nmap <buffer> <cr> gqj
     " add bullet in insert mode
     imap <buffer> <c-_> <bs><bs><bs><bs>-<space><space><space>
     imap <buffer> <c-\> <bs><bs><bs><bs><space><space><space><space>

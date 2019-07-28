@@ -67,6 +67,8 @@ command! Q q
 " Run selected command
 vmap Q "qy:@q<cr>
 
+vmap <c-y> "+y
+
 let mapleader=","
 nnoremap \ ,
 

@@ -14,3 +14,4 @@ au FileType typescript call FtTypescript()
 
 let g:typescript_compiler_options='--sourcemap --module commonjs'
 let g:syntastic_typescript_checkers = ['tsuquyomi']
+let g:tsuquyomi_single_quote_import = 1
