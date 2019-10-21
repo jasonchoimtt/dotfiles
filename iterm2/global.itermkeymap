@@ -1,0 +1,27 @@
+{
+  "Touch Bar Items": {},
+  "Key Mappings": {
+    "0x27-0x100000": {"Text": "\\<C-b>'", "Action": 38},
+    "0x31-0x100000": {"Text": "\\<C-b>1", "Action": 38},
+    "0x32-0x100000": {"Text": "\\<C-b>2", "Action": 38},
+    "0x33-0x100000": {"Text": "\\<C-b>3", "Action": 38},
+    "0x34-0x100000": {"Text": "\\<C-b>4", "Action": 38},
+    "0x35-0x100000": {"Text": "\\<C-b>5", "Action": 38},
+    "0x36-0x100000": {"Text": "\\<C-b>6", "Action": 38},
+    "0x37-0x100000": {"Text": "\\<C-b>7", "Action": 38},
+    "0x38-0x100000": {"Text": "\\<C-b>8", "Action": 38},
+    "0x39-0x100000": {"Text": "\\<C-b>9", "Action": 38},
+    "0x53-0x120000": {"Text": "\\<C-b>%", "Action": 38},
+    "0x5b-0x1c0000": {"Text": "Material", "Action": 40},
+    "0x5d-0x1c0000": {"Text": "MaterialDark", "Action": 40},
+    "0x60-0x180000": {"Text": "\\<C-b>\\<C-o>", "Action": 38},
+    "0x60-0x40000": {"Text": "\\<C-b>z", "Action": 38},
+    "0x65-0x100000": {"Text": "\\<C-b>e", "Action": 38},
+    "0x73-0x100000": {"Text": "\\<C-b>\"", "Action": 38},
+    "0x74-0x100000": {"Text": "\\<C-b>c", "Action": 38},
+    "0x77-0x100000": {"Text": "\\<C-d>", "Action": 38},
+    "0x9-0x40000": {"Text": "\\<C-b>;", "Action": 38},
+    "0xf700-0x320000": {"Text": "\\<C-b>g", "Action": 38},
+    "0xf701-0x320000": {"Text": "\\<C-b>G", "Action": 38}
+  }
+}
