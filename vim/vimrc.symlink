@@ -596,6 +596,9 @@ endif
 " ale {{{1
 if ide
     let g:ale_sign_column_always = 1
+    let g:ale_sign_error = ' >'
+    let g:ale_sign_warning = ' >'
+    let g:ale_sign_style_warning = ' .'
     " let g:ale_pattern_options = {'': {'ale_enabled': 0}}
     hi link ALEErrorSign ErrorMsg
     hi link ALEWarningSign WarningMsg
@@ -625,7 +628,7 @@ if ide
             call ale#Queue(200)  " delay
         endif
     endfunction
-    autocmd TextChanged,TextChangedI * call MyALELint()
+    autocmd InsertLeave,TextChanged * call MyALELint()
     let g:ale_lint_on_text_changed = 0
 endif
 
