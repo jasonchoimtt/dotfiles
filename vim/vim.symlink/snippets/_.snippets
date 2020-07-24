@@ -11,6 +11,10 @@ snippet #!!
 		exit 1
 	fi
 
+snippet die
+	echo "$1" >&2
+	exit 1
+
 snippet MIT
 	MIT License
 

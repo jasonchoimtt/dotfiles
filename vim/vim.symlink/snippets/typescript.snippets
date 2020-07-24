@@ -27,5 +27,9 @@ snippet main
 		$0
 	}
 
-	if (require.main === module)
+	if (require.main === module) {
 		main(process.argv);
+	}
+
+snippet t.
+	this.$1 = $1$0;

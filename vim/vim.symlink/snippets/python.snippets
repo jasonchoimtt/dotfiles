@@ -10,6 +10,8 @@ snippet bp
 	import pdb; pdb.set_trace()  # bp FIXME
 snippet ip
 	import IPython; IPython.embed()  # ip FIXME
+snippet ix
+	import code; code.interact(local=locals())  # ix FIXME
 snippet exit
 	import sys; sys.exit(1)  # exit FIXME
 snippet typ
@@ -42,6 +44,16 @@ snippet logger
 
 
 	logger = logging.getLogger('`substitute(expand('%:r'), '/', '.', 'g')`')
+snippet loghandler
+	logger.setLevel(logging.DEBUG)
+
+	datefmt = '%H:%M:%S'
+	fmt = '%(asctime)s %(levelname)s %(threadName)-10s %(name)-28s %(message)s'
+	formatter = logging.Formatter(fmt, datefmt=datefmt)
+
+	sh = logging.StreamHandler()
+	sh.setFormatter(formatter)
+	logger.addHandler(sh)
 snippet :
 	'$1': $1,
 snippet bench_time
