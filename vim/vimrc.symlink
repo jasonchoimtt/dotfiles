@@ -572,7 +572,7 @@ function! SuperSwitchFile()
                 echo "No js/ts file found"
             endtry
         endtry
-    elseif ext == '.c' || ext == '.cpp'
+    elseif ext == '.c'
         edit %:r.h
     elseif ext == '.h'
         try
@@ -584,6 +584,18 @@ function! SuperSwitchFile()
                 echo "No c/cpp file found"
             endtry
         endtry
+    elseif ext == '.cpp'
+        try
+            find %:r.hpp
+        catch /E345/
+            try
+                find %:r.h
+            catch /E345/
+                echo "No h/hpp file found"
+            endtry
+        endtry
+    elseif ext == '.hpp'
+        edit %:r.cpp
     elseif fname =~ '.pb.go$'
         edit %:r:r.proto
     elseif ext == '.proto'
