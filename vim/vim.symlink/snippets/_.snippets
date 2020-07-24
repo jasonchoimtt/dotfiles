@@ -15,6 +15,9 @@ snippet die
 	echo "$1" >&2
 	exit 1
 
+snippet iso8601
+	`system('date -u +"%Y-%m-%dT%H:%M:%SZ"')`
+
 snippet MIT
 	MIT License
 
