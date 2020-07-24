@@ -521,13 +521,28 @@ endif
 command! -nargs=1 Spaces setlocal ts=<args> sw=<args> sts=<args>
 
 " Auto readonly {{{1
-function! ConfigReadOnly()
+function! ShouldBeReadOnly()
     if expand('%') =~ '\(node_modules\|venv\)\/'
+        return 1
+    endif
+endfunction
+
+function! ConfigReadOnlyPre()
+    if ShouldBeReadOnly()
         setlocal ro noma
     endif
 endfunction
 " BufReadPre so that it is set before FileType
-autocmd BufReadPre * call ConfigReadOnly()
+autocmd BufReadPre * call ConfigReadOnlyPre()
+
+function! ConfigReadOnly()
+    if ShouldBeReadOnly()
+        setlocal ma
+        silent %s/\r$//ge
+        setlocal noma
+    endif
+endfunction
+autocmd BufRead * call ConfigReadOnly()
 
 " Switch file {{{1
 function! SwitchFile(ext)
