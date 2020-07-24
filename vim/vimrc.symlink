@@ -510,7 +510,8 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Remote power {{{1
 if !empty($TMUX)
-    command! Write w | call system('tmux send-keys -t {last} C-c Up Enter')
+    let g:delay = '1m'
+    command! Write w | exec 'sleep ' . g:delay | call system('tmux send-keys -t {last} C-c Up Enter')
     command! W Write
     command! Wa wa | call system('tmux send-keys -t {last} C-c Up Enter')
     command! TmuxSaveSwitchRerunWindow w | call system('tmux last-window \; send-keys C-c Up Enter')
