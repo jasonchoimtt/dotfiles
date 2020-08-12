@@ -3,12 +3,17 @@ if [[ -z "$INTERACTIVE" ]] || [[ -n "$SSH_CLIENT" ]]; then
 fi
 
 # Initialize fzf and related fuzzy finding, if available
-fzf_lib=~/.fzf.$SHELL_TYPE
-if [[ -f /usr/share/doc/fzf/examples/completion.$SHELL_TYPE ]]; then
-    fzf_lib=/usr/share/doc/fzf/examples/completion.$SHELL_TYPE
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    # Assume installed from Homebrew
+    fzf_path=/usr/local/opt/fzf/shell/
+else
+    fzf_path=/usr/share/doc/fzf/examples/
 fi
-if [ -f "$fzf_lib" ]; then
-    source "$fzf_lib"
+
+if [[ -f "$fzf_path/completion.$SHELL_TYPE" ]]; then
+    source "$fzf_path/completion.$SHELL_TYPE"
+    source "$fzf_path/key-bindings.$SHELL_TYPE"
+
     if which rg > /dev/null 2>&1; then
         export FZF_DEFAULT_COMMAND='rg --files'
         export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
@@ -17,7 +22,7 @@ if [ -f "$fzf_lib" ]; then
         export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
     fi
 
-    if [ $SHELL_TYPE '==' zsh ]; then
+    if [[ "$SHELL_TYPE" == zsh ]]; then
         _lazycomp() {
             local orig_lbuf=$LBUFFER tokens=(${(z)LBUFFER}) prefix lbuf
 
