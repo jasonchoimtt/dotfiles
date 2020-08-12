@@ -4,11 +4,10 @@ if-shell "[[ -n \"$SHELL\" ]]" "set-option -g default-shell \"$SHELL\""
 if-shell "which reattach-to-user-namespace && [[ -n \"$SHELL\" ]]" "set-option -g default-command \"reattach-to-user-namespace -l $SHELL\""
 
 # Version specific stuff
-if-shell "(( `echo \"$(tmux -V | cut -d ' ' -f 2) < 2.4\" | bc -l` ))" \
+if-shell "~/.dotfiles/tmux/detect-version.sh '' 2.4" \
     "source-file ~/.dotfiles/tmux/tmux-pre2.4.conf"
 
-# This also supports weird versions like 2.9a
-if-shell "! (( `echo \"$(tmux -V | cut -d ' ' -f 2) < 2.4\" | bc -l` ))" \
+if-shell "~/.dotfiles/tmux/detect-version.sh 2.4 ''" \
     "source-file ~/.dotfiles/tmux/tmux-2.4.conf"
 
 # vim hotkeys
@@ -68,6 +67,11 @@ bind-key , setw allow-rename off \; command-prompt -I "" "rename-window '%%'"
 bind-key a split-window -hb -l 30 -c "#{pane_current_path}" "vifm ."
 if-shell "which open" "bind-key e run-shell \"open \\\"#{pane_current_path}\\\"\""
 if-shell "which xdg-open" "bind-key e run-shell \"xdg-open \\\"#{pane_current_path}\\\"\""
+
+bind-key -n PgUp resize-pane -Z
+bind-key -n PgDn last-pane
+bind-key -n C-PgUp previous-window
+bind-key -n C-PgDn next-window
 
 # Tmux line, based on Powerline
 set -g status-style fg=default,bg=default
