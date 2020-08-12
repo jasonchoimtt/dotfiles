@@ -3,8 +3,12 @@ if [[ -z "$INTERACTIVE" ]] || [[ -n "$SSH_CLIENT" ]]; then
 fi
 
 # Initialize fzf and related fuzzy finding, if available
-if [ -f ~/.fzf.$SHELL_TYPE ]; then
-    source ~/.fzf.$SHELL_TYPE
+fzf_lib=~/.fzf.$SHELL_TYPE
+if [[ -f /usr/share/doc/fzf/examples/completion.$SHELL_TYPE ]]; then
+    fzf_lib=/usr/share/doc/fzf/examples/completion.$SHELL_TYPE
+fi
+if [ -f "$fzf_lib" ]; then
+    source "$fzf_lib"
     if which rg > /dev/null 2>&1; then
         export FZF_DEFAULT_COMMAND='rg --files'
         export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
