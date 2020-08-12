@@ -25,3 +25,5 @@
     tool = vimdiff
 [push]
     default = simple
+[pull]
+	ff = only
