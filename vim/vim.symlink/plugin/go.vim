@@ -14,7 +14,8 @@ endfunction
 au FileType go call GoFt()
 
 if has_key(g:ide_use, "go")
-    let g:go_fmt_fail_silently = 1
+    " let g:go_fmt_fail_silently = 1
     let g:go_fmt_experimental = 1 " Keeps folds
     let g:go_list_type = "quickfix"
+    let g:go_addtags_transform = "camelcase"
 endif
