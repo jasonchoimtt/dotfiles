@@ -40,6 +40,8 @@ set hidden
 set viminfo+=f1
 set splitright
 
+let mapleader=","
+
 try
     set nofileignorecase
 catch /E518/
@@ -69,8 +71,17 @@ vmap Q "qy:@q<cr>
 
 vmap <c-y> "+y
 
-let mapleader=","
-nnoremap \ ,
+" Append line to unnamed register
+function! AppendSelection()
+    let x = @"
+    normal gvy
+    let @" = x.@"
+endfunction
+vmap <silent> <leader>y <esc>:call AppendSelection()<cr>
+nmap <silent> <leader>y V<leader>y
+
+" :S is the same as :s
+cabbrev S s
 
 " List characters {{{1
 set listchars=tab:·\ ,trail:-,extends:>,precedes:<,nbsp:+
@@ -118,16 +129,16 @@ endfunction
 set foldtext=MyFoldText()
 
 " Unimpaired-ish toggling bindings
-nmap [oF :setlocal fdm=syntax<cr>
+nmap [of :setlocal fdm=syntax<cr>zM
+nmap ]of :setlocal fdm=manual<cr>
 nmap [oM :setlocal fdm=marker<cr>zR
-nmap ]oF :setlocal fdm=manual<cr>
 nmap [C :set conceallevel=1<cr>
 nmap ]C :set conceallevel=0<cr>
 
 
 " Mouse motion {{{1
-nnoremap <ScrollWheelUp> 3<c-y>3k
-nnoremap <ScrollWheelDown> 3<c-e>3j
+nnoremap <ScrollWheelUp> 5<c-y>5k
+nnoremap <ScrollWheelDown> 5<c-e>5j
 nmap <C-ScrollWheelUp> k
 nmap <C-ScrollWheelDown> j
 nmap <M-ScrollWheelUp> <c-y>
@@ -146,7 +157,6 @@ nnoremap ,o <c-i>
 " Go to last tab
 au TabLeave * let g:lasttab = tabpagenr()
 nmap <silent> g` :exe "tabn ".g:lasttab<cr>
-nmap <silent> <leader>d :tab sp<cr>
 
 " Terminal.app tab switching {{{1
 for i in [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -158,10 +168,6 @@ set incsearch
 nmap <silent> <esc><esc> :nohls<cr>
 nmap <silent> '; :nohls<cr>
 set timeout timeoutlen=3000 ttimeoutlen=10
-" Quickly replace word under cursor
-nmap g: :%s/\<<c-r><c-w>\>/
-nmap z: :%s/<c-r><c-w>/
-nmap gr :grep <cword><cr>
 
 " Add trailing character {{{1
 nmap <silent> <leader>, m`A,<esc>``
@@ -229,8 +235,8 @@ nmap gM :TmuxSaveSwitchRerunWindow<cr>
 nmap <silent> <leader>m :up<cr>:make<cr>
 nmap <silent> <leader>M :up<cr>:exec '!'.b:interpreter<cr>
 nmap <silent> <leader>N :exec '!'.b:repl_with_file<cr>
-nmap <silent> g<c-i> :exec '!'.b:repl<cr>
-nmap <silent> <leader><c-i> :Repl<cr>
+" nmap <silent> g<c-i> :exec '!'.b:repl<cr>
+" nmap <silent> <leader><c-i> :Repl<cr>
 
 command! -range=% ClangFormat exec 'normal m`'|exec '<line1>,<line2>!clang-format "--assume-filename=%:t" --style=file'|exec 'normal ``'
 
@@ -246,6 +252,22 @@ imap <c-j>< ≤
 imap <c-j>> ≥
 imap <c-j>( <c-k>(U
 imap <c-j>) <c-k>)U
+
+nmap <silent> \| :copy .<cr>
+vmap <silent> \ yP
+
+" repeat at next occurrence
+function! RepeatAtNextOccurrence()
+    if search(@") != 0
+        normal .
+    endif
+endfunction
+nmap <silent> \ :call RepeatAtNextOccurrence()<cr>
+
+" Quickly replace word under cursor
+nmap g: :%s/\<<c-r><c-w>\>/
+nmap z: :%s/<c-r><c-w>/
+nmap gr :grep <cword><cr>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Plugin supported stuff
@@ -382,6 +404,7 @@ nmap <silent> <c-f> :CtrlP<cr>
 nmap <silent> <leader>E :CtrlPBuffer<cr>
 nmap <silent> <leader>3 :CtrlP %:h<cr>
 nmap <leader>c :lcd %:p:h<cr>
+nmap <leader>C :exe 'lcd' fnameescape(getcwd(-1))<cr>
 
 nmap <silent> <leader>F :CtrlPTag<cr>
 nmap <silent> <leader>f :CtrlPBufTag<cr>
@@ -460,6 +483,7 @@ endif
 command! AutoSave au CursorHold <buffer> update
 command! NoAutoSave au! CursorHold <buffer>
 
+" Go to last edit position when opening file
 " :h last-position-jump
 au BufReadPost *
 \ if line("'\"") > 1 && line("'\"") <= line("$") && &ft !~# 'commit'
