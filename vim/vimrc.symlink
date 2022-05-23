@@ -341,8 +341,6 @@ endif
 
 call vundle#end()
 
-filetype plugin indent on
-
 command! VInstall normal VY:@"<cr>:VundleInstall<cr>
 
 " Colorscheme {{{1
