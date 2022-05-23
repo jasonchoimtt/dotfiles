@@ -42,7 +42,7 @@ setw -g allow-rename on
 # C-a b: restart command in last pane
 bind-key b send-keys -t {last} C-c Up Enter
 
-bind-key Tab last-pane
+bind-key Tab choose-tree "swap-pane -t '%%'"
 
 # Default to current directory
 unbind-key c
