@@ -44,43 +44,37 @@ if [[ -f "$fzf_path/completion.$SHELL_TYPE" ]]; then
             fi
         }
 
-        _fzf_complete_quoted() {
-            # fzf uses some magic name mangling to do the post processing action
-            # so we wrap it to trigger _fzf_complete_quoted_post
-            _fzf_complete "$@"
-        }
-
-        _fzf_complete_quoted_post() {
-            while read item; do
-                echo "${$(printf "%q" "$item")/\\~/~}"
-            done
-        }
-
         _xcd_impl() {
             local opts=""
             [ -n $LBUFFER ] && opts="--multi"
-            find "${cdxpath[@]}" -not -path '*/\.*' -maxdepth 2 -type d | _fzf_complete_quoted $opts "$@"
+            _fzf_complete $opts "$@" < <(
+                find "${cdxpath[@]}" -not -path '*/\.*' -maxdepth 2 -type d
+            )
         }
         xcd() { _lazycomp 'cd' _xcd_impl; }
         zle -N xcd
         bindkey '\Cxc' xcd
 
         _xcdr_impl() {
-            cdr -l | while read line; do
-                echo ${line[6,${#line}]}
-            done | _fzf_complete_quoted "" "$@"
+            _fzf_complete "" "$@" < <(
+                cdr -l | while read line; do
+                    echo ${line[6,${#line}]}
+                done
+            )
         }
         xcdr() { _lazycomp 'cd' _xcdr_impl; }
         zle -N xcdr
         bindkey '\Cxd' xcdr
 
         _xvim_impl() {
-            while read line; do
-                if [[ $line =~ '^> .*' ]]; then
-                    line=${line[3,${#line}]}
-                    [ -f ${line/\~/$HOME} ] && [[ $line =~ '~' ]] && echo $line
-                fi
-            done < ~/.viminfo | _fzf_complete_quoted "--multi" "$@"
+            _fzf_complete "--multi" "$@" < <(
+                while read line; do
+                    if [[ $line =~ '^> .*' ]]; then
+                        line=${line[3,${#line}]}
+                        [ -f ${line/\~/$HOME} ] && [[ $line =~ '~' ]] && echo $line
+                    fi
+                done < ~/.viminfo
+            )
         }
         xvim() { _lazycomp 'vim' _xvim_impl; }
         zle -N xvim
@@ -88,9 +82,13 @@ if [[ -f "$fzf_path/completion.$SHELL_TYPE" ]]; then
 
         _xvimopen_impl() {
             if [[ "$prefix" == */ && -d "$prefix" && "$prefix" != *\ * ]]; then
-                (cd "$prefix" && $=FZF_DEFAULT_COMMAND) | prefix= _fzf_complete_quoted "--multi --prompt=>$prefix" "$1$prefix"
+                prefix= _fzf_complete "--multi --prompt=>$prefix" "$1$prefix" < <(
+                    cd "$prefix" && $=FZF_DEFAULT_COMMAND
+                )
             else
-                $=FZF_DEFAULT_COMMAND | _fzf_complete_quoted "--multi" "$@"
+                _fzf_complete "--multi" "$@" < <(
+                    $=FZF_DEFAULT_COMMAND
+                )
             fi
         }
         xvimopen() { _lazycomp 'vim' _xvimopen_impl; }
@@ -99,9 +97,13 @@ if [[ -f "$fzf_path/completion.$SHELL_TYPE" ]]; then
 
         _xvimopen_all_impl() {
             if [[ "$prefix" == */ && -d "$prefix" && "$prefix" != *\ * ]]; then
-                (cd "$prefix" && ag -u -g "") | prefix= _fzf_complete_quoted "--multi --prompt=>$prefix" "$1$prefix"
+                prefix= _fzf_complete "--multi --prompt=>$prefix" "$1$prefix" < <(
+                    (cd "$prefix" && ag -u -g "")
+                )
             else
-                ag -u -g "" | _fzf_complete_quoted "--multi" "$@"
+                _fzf_complete "--multi" "$@" < <(
+                    ag -u -g ""
+                )
             fi
         }
         xvimopen_all() { _lazycomp 'vim' _xvimopen_all_impl; }
@@ -109,7 +111,7 @@ if [[ -f "$fzf_path/completion.$SHELL_TYPE" ]]; then
         bindkey '\Cxf' xvimopen_all
 
         _xopen_impl() {
-            $=FZF_DEFAULT_COMMAND | _fzf_complete_quoted "--multi" "$@"
+            _fzf_complete "--multi" "$@" < <($=FZF_DEFAULT_COMMAND)
         }
         xopen() { _lazycomp 'open' _xopen_impl; }
         zle -N xopen
@@ -126,7 +128,9 @@ if [[ -f "$fzf_path/completion.$SHELL_TYPE" ]]; then
 
         _xgitstatus_impl() {
             _is_git || return
-            git -c color.status=always status -s | _fzf_complete "--multi --ansi --nth=2" "$@"
+            _fzf_complete "--multi --ansi --nth=2" "$@" < <(
+                git -c color.status=always status -s
+            )
         }
         _xgitstatus_impl_post() {
             cut -b 3- | while read item; do
@@ -143,8 +147,9 @@ if [[ -f "$fzf_path/completion.$SHELL_TYPE" ]]; then
             [[ -n "$gref" ]] && commit=$gref
             local count=$(( $(git rev-list --count $commit) - 1 ))
             local min=$(( $count > 9 ? 9 : $count ))
-            git --no-pager log --pretty=oneline --color --abbrev-commit $commit~$min..$commit | \
-                _fzf_complete "--multi --ansi --nth=1" "$@"
+            _fzf_complete "--multi --ansi --nth=1" "$@" < <(
+                git --no-pager log --pretty=oneline --color --abbrev-commit $commit~$min..$commit
+            )
         }
         _xgitlog_impl_post() {
             cut -d ' ' -f 1
