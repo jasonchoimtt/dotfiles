@@ -312,6 +312,7 @@ if ide
 
     Plugin 'ap/vim-css-color'
     Plugin 'vim-scripts/AnsiEsc.vim'
+    Plugin 'editorconfig/editorconfig-vim'
     if has_key(ide_use, 'python')
         Plugin 'davidhalter/jedi-vim'
         Plugin 'Glench/Vim-Jinja2-Syntax'
@@ -323,9 +324,11 @@ if ide
     endif
     if has_key(ide_use, 'javascript')
         Plugin 'pangloss/vim-javascript'
+        Plugin 'MaxMEllon/vim-jsx-pretty'
         Plugin 'ternjs/tern_for_vim'
         Plugin 'Quramy/vim-js-pretty-template'
         Plugin 'jparise/vim-graphql'
+        Plugin 'styled-components/vim-styled-components'
     endif
     if has_key(ide_use, 'coffeescript')
         Plugin 'kchmck/vim-coffee-script'
@@ -358,6 +361,9 @@ if ide
     endif
     if has_key(ide_use, 'go')
         Plugin 'fatih/vim-go'
+    endif
+    if has_key(ide_use, 'solidity')
+        Plugin 'tomlion/vim-solidity'
     endif
 endif
 
@@ -580,8 +586,8 @@ endfunction
 function! SuperSwitchFile()
     let fname = expand('%')
     let ext = matchstr(fname, '\.[^.]\+$')
-    if ext == '.ts' || ext == '.js' || ext == '.jsx'
-        if fname =~ '\.\(spec\|sandbox\)\.[jt]sx\?$'
+    if ext =~ '\.[jt]sx\?'
+        if fname =~ '\.\(spec\|sandbox\|stories\)\.[jt]sx\?$'
             exec 'edit %:r:r'.ext
         else
             exec 'edit %:r.spec'.ext
@@ -593,7 +599,15 @@ function! SuperSwitchFile()
             try
                 find %:r.js
             catch /E345/
-                echo "No js/ts file found"
+                try
+                    find %:r.jsx
+                catch /E345/
+                    try
+                        find %:r:r.jsx
+                    catch /E345/
+                        echo "No js(x)/ts file found"
+                    endtry
+                endtry
             endtry
         endtry
     elseif ext == '.c'
@@ -631,7 +645,8 @@ map <silent> <leader>at :call SwitchFile('.ts')<cr>
 map <silent> <leader>ah :call SwitchFile('.html')<cr>
 map <silent> <leader>ac :call SwitchFile('.css')<cr>
 map <silent> <leader>as :call SwitchFile('.scss')<cr>
-map <silent> <leader>ab :call SwitchFile('.sandbox.ts')<cr>
+map <silent> <leader>am :call SwitchFile('.module.scss')<cr>
+map <silent> <leader>ab :call SwitchFile('.stories.tsx')<cr>
 map <silent> <c-w><leader>at :new %:r.ts<cr>
 map <silent> <c-w><leader>ah :new %:r.html<cr>
 map <silent> <c-w><leader>ac :new %:r.css<cr>
@@ -650,7 +665,7 @@ if ide
     let g:ale_sign_error = ' >'
     let g:ale_sign_warning = ' >'
     let g:ale_sign_style_warning = ' .'
-    " let g:ale_pattern_options = {'': {'ale_enabled': 0}}
+    let g:ale_fix_on_save = 1
     hi link ALEErrorSign ErrorMsg
     hi link ALEWarningSign WarningMsg
     hi link ALEStyleErrorSign WarningMsg
@@ -658,6 +673,7 @@ if ide
     hi link ALEStyleError SpellLocal
     nmap [oA :ALEEnableBuffer<cr>
     nmap ]oA :ALEDisableBuffer<cr>
+    nmap <leader>L <Plug>(ale_detail)
 
     " Disable by default: should call ALEEnableBuffer in plugin/{ft}.vim
     " BufRead seems to run after FileType
@@ -681,6 +697,23 @@ if ide
     endfunction
     autocmd InsertLeave,TextChanged * call MyALELint()
     let g:ale_lint_on_text_changed = 0
+
+    function! UseALENav()
+        nmap <buffer> <c-]> <Plug>(ale_go_to_definition)
+        nmap <buffer> g<c-]> <Plug>(ale_go_to_type_definition)
+
+        nmap <buffer> <c-w><c-]> <Plug>(ale_go_to_definition_in_split)
+        nmap <buffer> g<c-w><c-]> <Plug>(ale_go_to_type_definition_in_split)
+
+        nmap <buffer> K <Plug>(ale_documentation)
+        nmap <buffer> <leader>k <Plug>(ale_hover)
+        nmap <buffer> <leader>i <Plug>(ale_import)
+        nmap <buffer> <leader><c-^> :ALEFindReferences -relative -quickfix<cr>
+    endfunction
+
+    function! UseALEComplete()
+        setl omnifunc=ale#completion#OmniFunc
+    endfunction
 endif
 
 " fugitive {{{1
