@@ -74,7 +74,14 @@ if [[ -n "$INTERACTIVE" ]]; then
     }
 
     doenv_python() {
-        [[ -f venv/bin/activate ]] && source venv/bin/activate
+        if [[ -f venv/bin/activate ]]; then
+            if [[ $(file venv/bin/python) == *arm64 ]] && [[ $(uname -m) != arm64 ]] && [[ "$SHELL" == /usr/local/bin/zsh ]]; then
+                echo "Switching to ARM zsh"
+                exec env SHELL=/bin/zsh arch --arm64e /bin/zsh
+            else
+                source venv/bin/activate
+            fi
+        fi
     }
 
     doenv() {

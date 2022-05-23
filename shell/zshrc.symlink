@@ -2,7 +2,6 @@
 export DOTFILES_ROOT=~/.dotfiles
 source "$DOTFILES_ROOT/shell/feature-detection.sh"
 
-export SHELL=$(which zsh)
 bindkey -e  # emacs keys
 
 # History
@@ -39,8 +38,11 @@ _get_git_branch() {
 }
 
 setopt PROMPT_SUBST
+if [[ $(uname -m) == arm64 ]]; then
+    _arch=" arm"
+fi
 prompt_color() {
-    PS1="%F{$1}\$(_get_git_branch :)%c \$(date "+%H%M") %(?.$.%F{161}$%f) %f" # Non-breaking space
+    PS1="%F{$1}\$(_get_git_branch :)%c \$(date "+%H%M")$_arch %(?.$.%F{161}$%f) %f" # Non-breaking space
 }
 prompt_color $PROMPT_COLOR
 
