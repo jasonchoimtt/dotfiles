@@ -374,7 +374,7 @@ command! VInstall normal VY:@"<cr>:VundleInstall<cr>
 " Colorscheme {{{1
 try
     function! MaybeSwitchTheme()
-        let new_light = filereadable('/tmp/light-theme')
+        let new_light = !filereadable('/tmp/dark-theme')
         if g:light != new_light
             let g:light = new_light
             color my
@@ -385,7 +385,7 @@ try
     nmap <silent> <leader>[ :ThemeLight<cr>
     nmap <silent> <leader>] :Theme<cr>
 
-    let g:light = filereadable('/tmp/light-theme')
+    let g:light = !filereadable('/tmp/dark-theme')
     color my
     au VimResized * call MaybeSwitchTheme()
 catch /E185/
