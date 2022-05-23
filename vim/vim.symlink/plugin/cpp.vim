@@ -1,7 +1,7 @@
 function! FtCpp()
     let b:ale_linters = ['gcc']
     let b:ale_fixers = []
-    ALEEnable
+    ALEEnableBuffer
 endfunction
 au FileType cpp call FtCpp()
 

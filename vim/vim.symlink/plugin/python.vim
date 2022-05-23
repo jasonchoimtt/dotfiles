@@ -7,7 +7,7 @@ function! FtPython()
 
     if has_key(g:ide_use, 'python')
         let b:delimitMate_nesting_quotes = ['"', "'"]
-        let b:ale_linters = ['python', 'flake8']
+        let b:ale_linters = ['python', 'flake8', 'mypy']
         let b:ale_fixers = []
         if !&ro
             ALEEnableBuffer
