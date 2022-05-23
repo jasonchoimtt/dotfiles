@@ -513,6 +513,40 @@ nmap [ot :TableModeEnable<cr>
 nmap ]ot :TableModeDisable<cr>
 let g:table_mode_map_prefix = '<unused>'
 
+" Auto highlight {{{1
+" https://vim.fandom.com/wiki/Auto_highlight_current_word_when_idle
+
+function! HighlightCursorWord()
+    " if hlsearch is active, don't overwrite it!
+    let search = getreg('/')
+    let cword = expand('<cword>')
+    if match(cword, search) == -1
+        exec printf('match WordUnderCursor /\V\<%s\>/', escape(cword, '/\'))
+    endif
+endfunction
+
+hi WordUnderCursor ctermfg=16 ctermbg=187 guifg=fg guibg=#d7d7af
+
+function! AutoHighlightToggle()
+  if exists('#auto_highlight')
+    au! auto_highlight
+    augroup! auto_highlight
+    match none
+    setl updatetime=4000
+    echo 'Highlight current word: off'
+  else
+    augroup auto_highlight
+      au!
+      au CursorHold * call HighlightCursorWord()
+    augroup end
+    setl updatetime=300
+    call HighlightCursorWord()
+    echo 'Highlight current word: ON'
+  endif
+endfunction
+
+nmap z/ :call AutoHighlightToggle()<cr>
+
 " Goyo {{{1
 let g:goyo_width = 82
 if !empty($TMUX)
