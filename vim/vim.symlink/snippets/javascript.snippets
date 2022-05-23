@@ -1,6 +1,31 @@
+# See also ./typescript.snippets
+# See also ./javascriptreact.snippets
+# See also ./typescriptreact.snippets
+snippet im
+	import ${1:MyClass} from '${0:.}/$1';
 snippet imp
-	import ${1:module} from '$1';
+	import ${1:MyClass} from '$1';
+snippet im*
+	import * as $1 from '$1';
+snippet rb
+	import ${1:module} from 'react-bootstrap/$1';
 snippet ctor
 	constructor(${1}) {
 		${0:super();}
+	}
+snippet main
+	if (require.main === module) {
+		$0
+	}
+snippet center
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+snippet this.
+	this.$1 = $1;
+
+snippet for
+	for (const $1 of ${2:$1s}) {
+		$0
 	}

@@ -1,14 +1,24 @@
 snippet err
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 snippet ; e
 	; err != nil {
-		panic(err)
+		return err
 	}
 
 snippet main
 	func main() {
 		$0
 	}
+
+snippet defer
+	defer func() {
+		$0
+	}()
+
+snippet go
+	go func() {
+		$0
+	}()

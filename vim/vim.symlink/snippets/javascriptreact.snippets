@@ -1,0 +1,42 @@
+# See also ./javascript.snippets
+# See also ./typescript.snippets
+# See also ./typescriptreact.snippets
+snippet useState
+	const [$1, set${1/\w\+/\u\0/g}] = useState(${0:false});
+
+snippet palette
+	\${props => props.theme.palette.$0}
+
+snippet =
+	$1={$1}$0
+
+snippet Rea
+	import React from 'react';
+	import styled from 'styled-components';
+
+	const Styled$1 = styled.div\`\`;
+
+	const ${1:`Filename()`} = () => {
+		return (
+			<Styled$1>$1</Styled$1>
+		);
+	}
+
+	export default $1;
+
+snippet row
+	<AutoLayout direction="row" $1>$0
+	</AutoLayout>
+
+snippet column
+	<AutoLayout direction="column" $1>$0
+	</AutoLayout>
+
+snippet <
+	<div className="$1">$0</div>
+
+snippet imui
+	import ${1:MyClass} from '@mui/material/$1';$0
+
+snippet use
+	const $1 = use${1/\w\+/\u\0/g}($0);

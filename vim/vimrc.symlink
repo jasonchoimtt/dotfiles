@@ -388,6 +388,7 @@ endtry
 " snipMate {{{1
 let g:snipMate = {}
 let g:snipMate.scope_aliases = {}
+let g:snipMate.scope_aliases['typescriptreact'] = 'typescript,typescriptreact'
 let g:snipMate['no_match_completion_feedkeys_chars'] = ''
 let g:snipMate.snippet_version = 1
 imap <c-h> <Plug>snipMateNextOrTrigger
@@ -696,6 +697,12 @@ endtry
 nmap <silent> <Plug>TryFoldOpen @=(foldlevel('.')?'zO':'')<cr>
 nmap [c <Plug>GitGutterPrevHunk<Plug>TryFoldOpen
 nmap ]c <Plug>GitGutterNextHunk<Plug>TryFoldOpen
+
+" snipmate {{{1
+let g:snipMate.scope_aliases = {}
+let g:snipMate.scope_aliases['javascriptreact'] = 'javascript,javascriptreact'
+let g:snipMate.scope_aliases['typescript'] = 'javascript,typescript'
+let g:snipMate.scope_aliases['typescriptreact'] = 'javascript,javascriptreact,typescript,typescriptreact'
 
 " let $MANPAGER='cat'
 " function! Man(...)

@@ -1,0 +1,54 @@
+# See also ./javascript.snippets
+# See also ./typescript.snippets
+# See also ./javascriptreact.snippets
+snippet Re
+	import React from 'react';
+	import styled from 'styled-components';
+
+	const Styled$1 = styled.div\`\`;
+
+	export interface $1Props {
+	}
+
+	const ${1:`Filename()`} = ({}: $1Props): JSX.Element => {
+		return (
+			<Styled$1>$1</Styled$1>
+		);
+	}
+
+	export default $1;
+
+snippet styled
+	const Styled$1 = styled.div\`\`;
+
+	const ${1:SomeComp} = (): JSX.Element => {
+		return (
+			<Styled$1>$1</Styled$1>
+		);
+	}
+
+snippet story
+	import React from 'react';
+	import { ComponentMeta, ComponentStory } from '@storybook/react';
+
+	import ${1:`expand('%:t:r:r')`} from './$1';
+
+	export default {
+		title: '$0$1',
+		component: $1,
+	} as ComponentMeta<typeof $1>;
+
+	const Template: ComponentStory<typeof $1> = args => <$1 {...args} />;
+
+	export const Default = Template.bind({});
+	Default.args = {};
+
+snippet ch
+	children?: React.ReactNode;
+
+snippet cl
+	className?: string;
+	style?: React.CSSProperties;
+
+snippet cl=
+	className={className} style={style}
